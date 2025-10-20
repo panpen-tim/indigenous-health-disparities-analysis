@@ -25,7 +25,7 @@ The research integrates statistical sophistication with deep understanding of te
 - **Differentiate pathways** between diabetes (historical trauma) and mental health (healthcare access mediation)
 - **Validate structural frameworks** for health equity advocacy through statistical triangulation
 - **Support TRC Call to Action 19** implementation through data-driven approaches
-- 
+
 ## 🔬 Analytical Approach
 
 Developed through engagement with territorial health policy contexts, the integrated MFA→SEM→ML workflow demonstrates how sophisticated statistical methods can serve Indigenous health advocacy by:
