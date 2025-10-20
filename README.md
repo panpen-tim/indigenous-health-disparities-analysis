@@ -59,6 +59,10 @@ graph TD
 ![SEM Pathways](figures/sem_pathways.png)
 *Divergent causal pathways: healthcare access mediation for mental health vs. direct effects for diabetes*
 
+### Disparity Gaps
+![Disparity Gaps](figures/disparity_gaps.png)
+*Percentage point gaps in health indicators between Indigenous and non-Indigenous populations*
+
 ## 🔬 Advanced Statistical Features
 
 ### Cultural Safety Integration
@@ -162,14 +166,7 @@ This project demonstrates advanced methodological integration:
 
 ## 🔧 Generating Graphics for README
 
-To generate the graphics shown in this README, run:
-
-```r
-# Complete graphics generation
-source("generate_figures.R")
-```
-
-Or create individual plots:
+To generate the graphics shown in this README, run the following code chunks from the RMD file:
 ```r
 # MFA Plot
 ggsave("figures/mfa_analysis.png", mfa_plot, width=10, height=6, dpi=300)
@@ -177,8 +174,12 @@ ggsave("figures/mfa_analysis.png", mfa_plot, width=10, height=6, dpi=300)
 # Feature Importance
 ggsave("figures/feature_importance.png", p_importance, width=8, height=5, dpi=300)
 
-# SEM Pathway Diagram (if created)
+# SEM Pathway Diagram
 ggsave("figures/sem_pathways.png", sem_diagram, width=8, height=6, dpi=300)
+
+### Disparity Gaps Plot
+ggsave("figures/disparity_gaps.png", p_gaps_compact,
+       width = 8, height = 5, dpi = 300)
 ```
 
 ## 🤝 Contributing
