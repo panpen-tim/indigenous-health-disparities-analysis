@@ -370,14 +370,15 @@ kable(fit_indices_table, caption = "Structural Equation Model Fit Indices") %>%
 
 The SEM demonstrated excellent model fit (Table 3), with all fit indices meeting established thresholds for good fit.
 
-```{r sem-diagram, echo=FALSE, fig.cap="SEM Pathway Diagram with High-Contrast Theme", out.width="90%"}
+```{r sem-diagram0, echo=FALSE, fig.cap="SEM Pathway Diagram with High-Contrast Theme", out.width="80%", fig.height=8}
+library(semPlot)
 high_contrast_palette <- c(
   "#1f77b4", "#ff7f0e",  # Blue-Orange
   "#2ca02c", "#d62728",  # Green-Red
   "#9467bd", "#8c564b",  # Purple-Brown
   "#e377c2", "#7f7f7f"   # Pink-Gray
 )
-# Create custom color mapping for SEM elements
+
 sem_colors <- list(
   latent = high_contrast_palette[1],        # Blue for latent variables
   indigenous = high_contrast_palette[2],    # Orange for Indigenous status
@@ -386,63 +387,77 @@ sem_colors <- list(
   access_indicators = high_contrast_palette[5] # Purple for access indicators
 )
 
-# Create the SEM diagram with your theme colors
-sem_diagram <- semPaths(sem_fit,
-                       what = "std",
-                       whatLabels = "std",
-                       style = "lisrel",
-                       layout = "tree2",
-                       rotation = 1,
-                       curvePivot = TRUE,
-                       curve = 1.5,
-                       sizeMan = 10,
-                       sizeLat = 12,
-                       edge.label.cex = 1.3,
-                       label.cex = 1.4,
-                       nodeLabels = c("Indigenous\nStatus", 
-                                     "Diabetes", 
-                                     "Regular\nProvider",
-                                     "Unmet\nNeeds",
-                                     "Mental\nHealth",
-                                     "Healthcare\nAccess"),
-                       color = list(
-                         lat = sem_colors$latent,
-                         man = c(
-                           sem_colors$indigenous,      # indigenous_binary
-                           sem_colors$diabetes,        # has_diabetes  
-                           sem_colors$access_indicators, # has_regular_provider
-                           sem_colors$access_indicators, # has_unmet_needs
-                           sem_colors$mental_health    # poor_mental_health
-                         )
-                       ),
-                       edge.color = "black",
-                       mar = c(6,6,6,6),
-                       nCharNodes = 0,
-                       intercepts = FALSE,
-                       residuals = FALSE,
-                       thresholds = FALSE,
-                       optimizeLatRes = TRUE)
+# Use capture.output to completely suppress any output
+invisible(capture.output({
+  semPaths(sem_fit,
+           what = "std",
+           whatLabels = "std", 
+           style = "lisrel",
+           layout = "tree2",
+           rotation = 1,
+           curvePivot = TRUE,
+           curve = 1.5,
+           sizeMan = 7,
+           sizeLat = 9,
+           edge.label.cex = 0.9,
+           label.cex = 0.9,
+           nodeLabels = c("Indigenous\nStatus", 
+                         "Diabetes", 
+                         "Regular\nProvider",
+                         "Unmet\nNeeds",
+                         "Mental\nHealth",
+                         "Healthcare\nAccess"),
+           color = list(
+             lat = sem_colors$latent,
+             man = c(
+               sem_colors$indigenous,      # indigenous_binary
+               sem_colors$diabetes,        # has_diabetes  
+               sem_colors$access_indicators, # has_regular_provider
+               sem_colors$access_indicators, # has_unmet_needs
+               sem_colors$mental_health    # poor_mental_health
+             )
+           ),
+           edge.color = "black",
+           mar = c(6,4,6,4),  # Adjusted margins for legend space
+           nCharNodes = 0,
+           intercepts = FALSE,
+           residuals = FALSE,
+           thresholds = FALSE,
+           optimizeLatRes = TRUE)
+}))
 
-# Add title with your theme styling
-title("Structural Equation Model: Healthcare Access Pathways\nStandardized Coefficients Shown", 
-      line = 2, cex.main = 1.2, col = high_contrast_palette[1])
+# Add title
+title("SEM: Healthcare Access Pathways\nStandardized Coefficients", 
+      line = 1, cex.main = 0.9, col = high_contrast_palette[1])
 
-# Add legend using your theme colors
-legend("bottomright", 
+# Add legend in a visible position (bottom with small positive inset)
+legend("bottom", 
        legend = c("Latent Construct", "Indigenous Status", "Diabetes", 
                  "Mental Health", "Access Indicators"),
        fill = c(sem_colors$latent, sem_colors$indigenous, sem_colors$diabetes,
                sem_colors$mental_health, sem_colors$access_indicators),
-       cex = 0.8, bty = "n", text.col = high_contrast_palette[3])
+       cex = 0.6, bty = "n", text.col = high_contrast_palette[3],
+       horiz = FALSE, ncol = 2, xpd = TRUE, inset = c(0, 0.02))
+```
+
+```{r sem-diagram, echo=FALSE, fig.cap="SEM Pathway Diagram with High-Contrast Theme", out.width="80%", fig.height=8,include=F}
+# Ensure figures directory exists
+if(!dir.exists("figures")) dir.create("figures")
 
 # Save high-quality version
-png("figures/sem_pathways.png", width = 12, height = 9, units = "in", res = 300)
+png("figures/sem_pathways.png", width = 10, height = 8, units = "in", res = 300)
 semPaths(sem_fit,
-         what = "std", whatLabels = "std",
-         style = "lisrel", layout = "tree2",
-         rotation = 1, curvePivot = TRUE, curve = 1.5,
-         sizeMan = 10, sizeLat = 12,
-         edge.label.cex = 1.3, label.cex = 1.4,
+         what = "std", 
+         whatLabels = "std",
+         style = "lisrel", 
+         layout = "tree2",
+         rotation = 1, 
+         curvePivot = TRUE, 
+         curve = 1.5,
+         sizeMan = 7,        
+         sizeLat = 9,
+         edge.label.cex = 0.9, 
+         label.cex = 0.9,
          nodeLabels = c("Indigenous\nStatus", "Diabetes", "Regular\nProvider",
                        "Unmet\nNeeds", "Mental\nHealth", "Healthcare\nAccess"),
          color = list(
@@ -451,16 +466,22 @@ semPaths(sem_fit,
                   sem_colors$access_indicators, sem_colors$access_indicators,
                   sem_colors$mental_health)
          ),
-         edge.color = "black", mar = c(6,6,6,6),
-         nCharNodes = 0, intercepts = FALSE, residuals = FALSE)
-title("Structural Equation Model: Healthcare Access Pathways\nStandardized Coefficients Shown", 
-      line = 2, cex.main = 1.2, col = high_contrast_palette[1])
-legend("bottomright", 
+         edge.color = "black", 
+         mar = c(6,4,6,4),  # Same margins as above
+         nCharNodes = 0, 
+         intercepts = FALSE, 
+         residuals = FALSE,
+         thresholds = FALSE,
+         optimizeLatRes = TRUE)
+title("SEM: Healthcare Access Pathways\nStandardized Coefficients", 
+      line = 1, cex.main = 0.9, col = high_contrast_palette[1])
+legend("bottom", 
        legend = c("Latent Construct", "Indigenous Status", "Diabetes", 
                  "Mental Health", "Access Indicators"),
        fill = c(sem_colors$latent, sem_colors$indigenous, sem_colors$diabetes,
                sem_colors$mental_health, sem_colors$access_indicators),
-       cex = 0.8, bty = "n", text.col = high_contrast_palette[3])
+       cex = 0.6, bty = "n", text.col = high_contrast_palette[3],
+       horiz = FALSE, ncol = 2, xpd = TRUE, inset = c(0, 0.02))
 dev.off()
 ```
 
@@ -602,7 +623,7 @@ gap_table <- gap_analysis %>%
 kable(gap_table, caption = "Percentage Point Gaps in Health Indicators (Indigenous - Non-Indigenous)") %>%
   kable_styling(bootstrap_options = c("striped", "hover"), full_width = FALSE)
 ```
-The disparity gaps visualization (Figure 3) shows percentage point differences between Indigenous groups and the non-Indigenous reference population. The red dashed line at zero represents the non-Indigenous baseline. Bars extending to the right indicate higher prevalence among Indigenous groups, while bars extending to the left would indicate lower prevalence. First Nations populations experience the largest gaps in unmet healthcare needs (`r round(gap_analysis$Unmet_Gap[1], 1)` percentage points higher) and diabetes prevalence (`r round(gap_analysis$Diabetes_Gap[1], 1)` percentage points higher), while Métis populations show substantial gaps in unmet (healthcare) needs (`r round(gap_analysis$Unmet_Gap[2], 1)` percentage points) and mental health indicators.
+The disparity gaps visualization (Figure 3) shows percentage point differences between Indigenous groups and the non-Indigenous reference population. The red dashed line at zero represents the non-Indigenous baseline. Bars extending to the right indicate higher prevalence among Indigenous groups, while bars extending to the left would indicate lower prevalence. First Nations populations experience the largest gaps in unmet healthcare needs (`r round(gap_analysis$Unmet_Gap[1], 1)` percentage points higher) and diabetes prevalence (`r round(gap_analysis$Diabetes_Gap[1], 1)` percentage points higher), while Métis populations show substantial gaps in unmet healthcare needs (`r round(gap_analysis$Unmet_Gap[2], 1)` percentage points) and mental health indicators.
 
 \newpage
 
