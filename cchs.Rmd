@@ -602,7 +602,7 @@ gap_table <- gap_analysis %>%
 kable(gap_table, caption = "Percentage Point Gaps in Health Indicators (Indigenous - Non-Indigenous)") %>%
   kable_styling(bootstrap_options = c("striped", "hover"), full_width = FALSE)
 ```
-The disparity gaps analysis reveals substantial inequities across all health domains (Figure 3). First Nations populations experience `r round(gap_analysis$Unmet_Gap[1], 1)`% higher unmet healthcare needs compared to non-Indigenous populations, while Métis populations show `r round(gap_analysis$Unmet_Gap[2], 1)`% higher unmet needs. Diabetes disparities are particularly pronounced, with First Nations communities experiencing `r round(gap_analysis$Diabetes_Gap[1], 1)`% higher prevalence, contextualized within historical and intergenerational food insecurity pathways. These gaps represent not merely statistical differences but concrete manifestations of structural barriers in healthcare access and social determinants of health.
+The disparity gaps visualization (Figure 3) shows percentage point differences between Indigenous groups and the non-Indigenous reference population. The red dashed line at zero represents the non-Indigenous baseline. Bars extending to the right indicate higher prevalence among Indigenous groups, while bars extending to the left would indicate lower prevalence. First Nations populations experience the largest gaps in unmet healthcare needs (`r round(gap_analysis$Unmet_Gap[1], 1)` percentage points higher) and diabetes prevalence (`r round(gap_analysis$Diabetes_Gap[1], 1)` percentage points higher), while Métis populations show substantial gaps in unmet (healthcare) needs (`r round(gap_analysis$Unmet_Gap[2], 1)` percentage points) and mental health indicators.
 
 \newpage
 
