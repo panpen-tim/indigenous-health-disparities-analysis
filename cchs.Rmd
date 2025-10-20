@@ -238,7 +238,7 @@ importance_df <- as.data.frame(rf_model$importance) %>%
 
 # Introduction
 
-Indigenous health inequities in Canada persist as manifestations of historical trauma and colonial policies that continue to shape contemporary health outcomes (Truth and Reconciliation Commission, 2015). These disparities reflect complex, structurally-mediated pathways rooted in colonial policies, socioeconomic marginalization, and systemic barriers to healthcare access that operate across mental, physical, emotional, and spiritual dimensions of health (Hogg et al., 2024). The over-representation of diabetes among Indigenous populations must be understood within this historical context of inter-generational food insecurity and disrupted relationships with traditional food systems (UWO Commentary, 2024).
+Indigenous health inequities in Canada persist as manifestations of historical trauma and colonial policies that continue to shape contemporary health outcomes (Truth and Reconciliation Commission, 2015). These disparities reflect complex, structurally-mediated pathways rooted in colonial policies, socioeconomic marginalization, and systemic barriers to healthcare access that operate across mental, physical, emotional, and spiritual dimensions of health (Hogg et al., 2024). The over-representation of diabetes among Indigenous populations must be understood within the historical context of inter-generational food insecurity and disrupted relationships with traditional food systems (UWO Commentary, 2024).
 
 In Manitoba, where Indigenous peoples comprise a significant portion of the population, territorial political advocacy organizations have consistently advanced research approaches that center Indigenous ways of knowing and address structural determinants of health. Drawing from professional experience in Indigenous health policy analysis, this research responds to territorial advocacy priorities by employing methodological approaches that respect nation-specific frameworks and honor distinct cultural conceptions of health and wellbeing.
 
@@ -254,7 +254,19 @@ The integrated methodological framework combines MFA for structural pattern disc
 
 ## Data Source and Sample
 
-The analysis used pooled Canadian Community Health Survey (CCHS) data from 2015-2016 and 2017-2018 cycles. The CCHS employs a complex sampling design to provide nationally representative health data (Statistics Canada, 2019). The analytical sample included `r nrow(analysis_data)` complete cases after harmonization and missing data exclusion, comprising `r table(analysis_data$indigenous_group)["First Nations"]` First Nations, `r table(analysis_data$indigenous_group)["Métis"]` Métis, and `r table(analysis_data$indigenous_group)["Inuit"]` Inuit respondents, with `r table(analysis_data$indigenous_group)["Non-Indigenous"]` non-Indigenous comparisons.
+The analysis used pooled Canadian Community Health Survey (CCHS) data from 2015-2016 (Statistics Canada, 2018) and 2017-2018 (Statistics Canada, 2020) cycles. The CCHS employs a complex multi-stage sampling design to provide nationally representative health data for the Canadian population aged 12 and older. All analyses respect Statistics Canada's ethical guidelines for disclosure control and data reliability (Statistics Canada, 2023). The analytical sample included `r nrow(analysis_data)` complete cases after harmonization and missing data exclusion, comprising `r table(analysis_data$indigenous_group)["First Nations"]` First Nations, `r table(analysis_data$indigenous_group)["Métis"]` Métis, and `r table(analysis_data$indigenous_group)["Inuit"]` Inuit respondents, with `r table(analysis_data$indigenous_group)["Non-Indigenous"]` non-Indigenous comparisons.
+
+## Data Harmonization and Cross-Sectional Design Justification
+
+The 2015-2016 and 2017-2018 CCHS cycles were harmonized and pooled as a cross-sectional sample rather than analyzed longitudinally for three methodological and substantive reasons:
+
+1. **Sample Size Considerations**: Pooling cycles increased statistical power for analyzing Indigenous health disparities, particularly for subgroup analyses (First Nations, Métis, Inuit) where individual cycle sample sizes would be insufficient for robust multivariate analysis.
+
+2. **Cross-Sectional Design of CCHS**: While CCHS collects some longitudinal data, the public use microdata files do not include person-level identifiers necessary for longitudinal linkage across cycles. The survey design treats each cycle as an independent cross-sectional sample.
+
+3. **Policy Relevance**: Territorial organizations require contemporary, population-level estimates of structural barriers. Pooling the most recent available cycles provides the largest possible sample for identifying current disparity patterns relevant to ongoing policy advocacy.
+
+The approach follows established methodologies for analyzing health disparities using pooled CCHS cycles (cite relevant methodology papers if available).
 
 ## Measures
 
@@ -273,15 +285,15 @@ The analysis used pooled Canadian Community Health Survey (CCHS) data from 2015-
 
 The study implemented an integrated mixed-methods approach with three complementary components:
 
-**Multiple Factor Analysis (MFA)**: Examined the underlying structure of five health domain variables, treating Indigenous status as a supplementary variable to map group disparities in multivariate space (Husson et al., 2010). This approach acknowledges the multidimensional nature of health disparities while maintaining methodological rigor.
+**Multiple Factor Analysis (MFA)**: Examined the underlying structure of five health domain variables, treating Indigenous status as a supplementary variable to map group disparities in multivariate space (Husson et al., 2010). The approach acknowledges the multidimensional nature of health disparities while maintaining methodological rigor.
 
 **Structural Equation Modeling (SEM)**: Tested healthcare access as a latent mediator between Indigenous status and health outcomes, using maximum likelihood estimation with missing data handling (Kline, 2015). The model specification incorporated insights from historical trauma literature regarding diabetes pathways.
 
-**Machine Learning Ensemble**: Random Forest and XGBoost provided complementary feature importance rankings for predicting Indigenous status, with 70/30 train-test split and cross-validation, highlighting the strongest disparity drivers (Breiman, 2001; Chen & Guestrin, 2016). This approach prioritizes actionable intervention targets for policy makers.
+**Machine Learning Ensemble**: Random Forest and XGBoost provided complementary feature importance rankings for predicting Indigenous status, with 70/30 train-test split and cross-validation, highlighting the strongest disparity drivers (Breiman, 2001; Chen & Guestrin, 2016). The approach prioritizes actionable intervention targets for policy makers.
 
 ## Integrated Workflow Narrative
 
-The MFA→SEM→ML workflow represents a methodological innovation in health disparities research. MFA identified structural patterns in healthcare access disparities, SEM tested specific mediation pathways suggested by the MFA results, and machine learning quantified the relative importance of different disparity drivers. This sequential approach ensures that exploratory findings inform confirmatory testing, while predictive modeling identifies practical intervention targets.
+The MFA→SEM→ML workflow represents a methodological innovation in health disparities research. MFA identified structural patterns in healthcare access disparities, SEM tested specific mediation pathways suggested by the MFA results, and machine learning quantified the relative importance of different disparity drivers. The sequential approach ensures that exploratory findings inform confirmatory testing, while predictive modeling identifies practical intervention targets.
 
 ## Statistical Software
 
@@ -628,28 +640,28 @@ The disparity gaps visualization (Figure 3) shows percentage point differences b
 \newpage
 
 # Discussion
-This study demonstrates the value of an integrated mixed-methods approach for understanding the complex architecture of Indigenous health disparities in Canada through a cultural safety lens (Hogg et al., 2024). The findings reveal fundamental insights with significant methodological and policy implications, contextualized within the four directions of healing—mental, physical, emotional, and spiritual—that frame Indigenous conceptions of health.
+The study demonstrates the value of an integrated mixed-methods approach for understanding the complex architecture of Indigenous health disparities in Canada through a cultural safety lens (Hogg et al., 2024). The findings reveal fundamental insights with significant methodological and policy implications, contextualized within the four directions of healing—mental, physical, emotional, and spiritual—that frame Indigenous conceptions of health.
 
 ## Key Findings and Policy Implications
-This study demonstrates the value of an integrated mixed-methods approach for understanding the complex architecture of Indigenous health disparities in Canada through a cultural safety lens (Hogg et al., 2024). The findings reveal fundamental insights with significant methodological and policy implications, contextualized within the four directions of healing—mental, physical, emotional, and spiritual—that frame Indigenous conceptions of health.
+The study demonstrates the value of an integrated mixed-methods approach for understanding the complex architecture of Indigenous health disparities in Canada through a cultural safety lens (Hogg et al., 2024). The findings reveal fundamental insights with significant methodological and policy implications, contextualized within the four directions of healing—mental, physical, emotional, and spiritual—that frame Indigenous conceptions of health.
 
 ### Divergent Health Outcome Pathways Require Distinct Policy Responses
 The SEM results reveal fundamentally different causal pathways for diabetes versus mental health disparities, with critical implications for policy targeting:
 
 ### Diabetes: Historical Trauma Embodiment
-The significant direct effect of Indigenous status on diabetes ($\beta$ = `r round(sem_results[sem_results$lhs=="has_diabetes" & sem_results$rhs=="indigenous_binary", "std.all"], 3)`, p < .001), largely unmediated by contemporary healthcare access, underscores how diabetes disparities represent the embodiment of historical trauma and intergenerational disruption. This pathway operates through colonial disruptions to traditional food systems, forced dietary changes, and transgenerational metabolic impacts that cannot be fully addressed through healthcare access alone. For territorial political organizations, this necessitates trauma-informed approaches addressing intergenerational impacts beyond healthcare system reforms.
+The significant direct effect of Indigenous status on diabetes ($\beta$ = `r round(sem_results[sem_results$lhs=="has_diabetes" & sem_results$rhs=="indigenous_binary", "std.all"], 3)`, p < .001), largely unmediated by contemporary healthcare access, underscores how diabetes disparities represent the embodiment of historical trauma and intergenerational disruption. The pathway operates through colonial disruptions to traditional food systems, forced dietary changes, and transgenerational metabolic impacts that cannot be fully addressed through healthcare access alone. For territorial political organizations, the necessitates trauma-informed approaches addressing intergenerational impacts beyond healthcare system reforms.
 
 ### Mental Health: Structural Mediation Dominance
-In stark contrast, mental health disparities operate primarily through healthcare access mediation ($\beta$ = `r round(sem_results[sem_results$lhs=="poor_mental_health" & sem_results$rhs=="healthcare_access", "std.all"], 3)`, p < .001), with minimal direct Indigenous effects ($\beta$ = `r round(sem_results[sem_results$lhs=="poor_mental_health" & sem_results$rhs=="indigenous_binary", "std.all"], 3)`). This indicates that `r round((abs(sem_results[sem_results$lhs=="poor_mental_health" & sem_results$rhs=="healthcare_access", "std.all"]) / (abs(sem_results[sem_results$lhs=="poor_mental_health" & sem_results$rhs=="healthcare_access", "std.all"]) + abs(sem_results[sem_results$lhs=="poor_mental_health" & sem_results$rhs=="indigenous_binary", "std.all"])) * 100), 0)`% of the Indigenous mental health disparity is explained by healthcare access barriers, making mental health outcomes particularly responsive to structural healthcare reforms. This validates advocacy focusing on healthcare system barriers for mental health outcomes.
+In stark contrast, mental health disparities operate primarily through healthcare access mediation ($\beta$ = `r round(sem_results[sem_results$lhs=="poor_mental_health" & sem_results$rhs=="healthcare_access", "std.all"], 3)`, p < .001), with minimal direct Indigenous effects ($\beta$ = `r round(sem_results[sem_results$lhs=="poor_mental_health" & sem_results$rhs=="indigenous_binary", "std.all"], 3)`). It indicates that `r round((abs(sem_results[sem_results$lhs=="poor_mental_health" & sem_results$rhs=="healthcare_access", "std.all"]) / (abs(sem_results[sem_results$lhs=="poor_mental_health" & sem_results$rhs=="healthcare_access", "std.all"]) + abs(sem_results[sem_results$lhs=="poor_mental_health" & sem_results$rhs=="indigenous_binary", "std.all"])) * 100), 0)`% of the Indigenous mental health disparity is explained by healthcare access barriers, making mental health outcomes particularly responsive to structural healthcare reforms. It validates advocacy focusing on healthcare system barriers for mental health outcomes.
 
 ### Healthcare Access Construct Validation
-The strong factor loading of unmet needs on the healthcare access latent variable ($\beta$ = `r round(sem_results[sem_results$lhs=="healthcare_access" & sem_results$rhs=="has_unmet_needs", "std.all"], 3)`, p < .001) confirms that unmet healthcare needs serve as the primary indicator of structural access barriers. This empirical validation explains why machine learning identified unmet needs as the strongest predictor of Indigenous status (Gini importance = `r round(importance_df$MeanDecreaseGini[1], 1)`), providing robust evidence for prioritizing unmet needs in policy interventions.
+The strong factor loading of unmet needs on the healthcare access latent variable ($\beta$ = `r round(sem_results[sem_results$lhs=="healthcare_access" & sem_results$rhs=="has_unmet_needs", "std.all"], 3)`, p < .001) confirms that unmet healthcare needs serve as the primary indicator of structural access barriers. The empirical validation explains why machine learning identified unmet needs as the strongest predictor of Indigenous status (Gini importance = `r round(importance_df$MeanDecreaseGini[1], 1)`), providing robust evidence for prioritizing unmet needs in policy interventions.
 
-The MFA revealed that healthcare access dimensions explain the majority of systematic variance in Indigenous health disparities. For Northern Manitoba communities represented by organizations like MKO, this structural patterning underscores that health inequities are not individual failures but systematic structural inequities requiring policy-level interventions. The clear separation between Indigenous and non-Indigenous groups along healthcare access dimensions reflects the geographic and systemic barriers that disproportionately affect Northern communities.
+The MFA revealed that healthcare access dimensions explain the majority of systematic variance in Indigenous health disparities. For Northern Manitoba communities represented by organizations like MKO, the structural patterning underscores that health inequities are not individual failures but systematic structural inequities requiring policy-level interventions. The clear separation between Indigenous and non-Indigenous groups along healthcare access dimensions reflects the geographic and systemic barriers that disproportionately affect Northern communities.
 
-The diabetes disparities must be understood within the context of historical and inter-generational food insecurity, where colonial policies disrupted traditional food systems and created dependency on nutritionally inadequate food sources (UWO Commentary, 2024). For policy analysis in territorial political advocacy contexts, this means framing diabetes not as a biomedical condition but as a manifestation of historical trauma, where the intergenerational disruption of traditional foodways and forced dependency on government programs created the conditions for metabolic disease disparities.
+The diabetes disparities must be understood within the context of historical and inter-generational food insecurity, where colonial policies disrupted traditional food systems and created dependency on nutritionally inadequate food sources (UWO Commentary, 2024). For policy analysis in territorial political advocacy contexts, it means framing diabetes not as a biomedical condition but as a manifestation of historical trauma, where the intergenerational disruption of traditional foodways and forced dependency on government programs created the conditions for metabolic disease disparities.
 
-Machine learning analysis established a clear hierarchy of disparity drivers, with unmet healthcare needs emerging as the most powerful differentiator of Indigenous status (Gini importance = `r round(importance_df$MeanDecreaseGini[1], 1)`). For policy analysts working with territorial organizations, this provides empirical prioritization: addressing unmet healthcare needs should be the primary focus, particularly given the geographic isolation and healthcare infrastructure gaps in Northern Manitoba.
+Machine learning analysis established a clear hierarchy of disparity drivers, with unmet healthcare needs emerging as the most powerful differentiator of Indigenous status (Gini importance = `r round(importance_df$MeanDecreaseGini[1], 1)`). For policy analysts working with territorial organizations, it provides empirical prioritization: addressing unmet healthcare needs should be the primary focus, particularly given the geographic isolation and healthcare infrastructure gaps in Northern Manitoba.
 
 ## Strategic Policy Framing for Territorial Advocacy
 When analyzing health policies for territorial political organizations, the data support framing health inequities as:
@@ -665,7 +677,7 @@ When analyzing health policies for territorial political organizations, the data
 5. **Northern Context Specificity**: For Northern communities, geographic isolation compounds systemic barriers. Policy analysis must account for the unique challenges of service delivery in remote regions.
 
 ## Methodological Contribution
-This project represents significant methodological advancement through its integrated design where each technique informs the next in a coherent analytical pipeline. The SEM component moves beyond descriptive pattern recognition to test specific causal pathways, while machine learning provides actionable prioritization for policy interventions.
+The project represents significant methodological advancement through its integrated design where each technique informs the next in a coherent analytical pipeline. The SEM component moves beyond descriptive pattern recognition to test specific causal pathways, while machine learning provides actionable prioritization for policy interventions.
 
 ## Limitations and Future Research
 This study has several limitations, including its cross-sectional design, which limits causal inference. Future research should incorporate longitudinal designs, community-based participatory research methods, and more nuanced measures of colonialism and cultural connectedness that better capture the four directions of healing.
@@ -674,7 +686,7 @@ This study has several limitations, including its cross-sectional design, which 
 
 The triangulation of multivariate methods provides robust evidence that structural healthcare access barriers, particularly unmet needs, are the primary drivers of Indigenous health disparities in Canada, but with crucial pathway differentiation. The SEM revealed that mental health disparities operate primarily through healthcare access mediation (72% of disparity), making them directly addressable through systemic reforms, while diabetes disparities reflect stronger historical trauma pathways requiring trauma-informed approaches beyond healthcare access alone.
 
-For policy analysts working with territorial political organizations, this analysis supports differentiated advocacy: healthcare system reforms for mental health equity and historical trauma interventions for diabetes prevention. By centering structural determinants within a cultural safety framework and employing advanced statistical methods, this research contributes to both methodological innovation and health equity advancement that honors the four directions of healing.
+For policy analysts working with territorial political organizations, the analysis supports differentiated advocacy: healthcare system reforms for mental health equity and historical trauma interventions for diabetes prevention. By centering structural determinants within a cultural safety framework and employing advanced statistical methods, this research contributes to both methodological innovation and health equity advancement that honors the four directions of healing.
 
 \newpage
 
@@ -708,7 +720,25 @@ Husson, F., Lé, S., & Pagès, J. (2010). *Exploratory multivariate analysis by 
 \setlength{\parindent}{-0.5in}
 \setlength{\leftskip}{0.5in}
 \setlength{\parskip}{8pt}
-Kline, R. B. (2015). *Principles and practice of structural equation modeling*. Guilford publications.
+Kline, R. B. (2015). *Principles and practice of structural equation modeling*. Guilford publications.  
+
+\setlength{\parindent}{-0.5in}
+\setlength{\leftskip}{0.5in}
+\setlength{\parskip}{8pt}
+Statistics Canada. (2018). *Canadian Community Health Survey (CCHS) - 2015-2016 Annual component* [Data set]. Odesi.
+https://odesi.ca/en/details?id=/odesi/doi\_\_10-5683\_SP3\_YJBSEJ.xml
+
+\setlength{\parindent}{-0.5in}
+\setlength{\leftskip}{0.5in}
+\setlength{\parskip}{8pt}
+Statistics Canada. (2020). *Canadian Community Health Survey (CCHS) - 2017-2018 Annual component* [Data set]. Borealis, The Canadian Dataverse Repository.
+https://abacus.library.ubc.ca/dataset.xhtml?persistentId=hdl:11272.1/AB2/SEB16A
+
+\setlength{\parindent}{-0.5in}
+\setlength{\leftskip}{0.5in}
+\setlength{\parskip}{8pt}
+Statistics Canada. (2023). *Ethical guidelines for statistical projects*. 
+https://www.statcan.gc.ca/en/about/policy/ethical-guidelines
 
 \setlength{\parindent}{-0.5in}
 \setlength{\leftskip}{0.5in}
@@ -720,6 +750,8 @@ Truth and Reconciliation Commission of Canada. (2015). *Honouring the truth, rec
 \setlength{\parskip}{8pt}
 University of Western Ontario Commentary. (2024). *Indigenous health inequity: Understanding our journey to understand our health*. Global Health Equity Blog.
 
-**Note:** Additional references from the provided literature have been integrated throughout the document.
+**Note:** Additional references from the provided literature have been integrated throughout the document.  
+
+**Note:** All analyses are based on Statistics Canada data and the responsibility for the use and interpretation of these data is entirely that of the author.
 
 
