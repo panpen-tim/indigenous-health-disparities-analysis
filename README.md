@@ -113,8 +113,8 @@ source("render_report.R")
 
 ```
 HealthIneq/
-├── cchs.Rmd  # Main analysis document
-├── cchs.pdf          # Complete technical report
+├── cchs.Rmd                                # Main analysis document
+├── cchs.pdf                                # Complete technical report
 ├── README.md                               # This file
 ├── render_report.R                         # One-click PDF generation
 ├── figures/                                # Generated visualizations
