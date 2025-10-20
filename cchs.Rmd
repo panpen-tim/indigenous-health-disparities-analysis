@@ -39,7 +39,7 @@ r_pack = c(
   "tidyverse", "FactoMineR", "factoextra", "dplyr", "lavaan", "stringr",
   "cchsflow", "haven", "randomForest", "SHAPforxgboost", "ggforce",
   "ggplot2", "viridis", "RColorBrewer", "kableExtra", "ggpubr",
-  "corrplot", "GGally", "patchwork", "scales", "xgboost", "ggridges", "pROC"
+  "corrplot", "GGally", "patchwork", "scales", "xgboost", "ggridges", "pROC","semPlot"
 )
 new_r = r_pack[!(r_pack %in% installed.packages()[,"Package"])]
 if(length(new_r)) install.packages(new_r)
@@ -367,6 +367,101 @@ kable(fit_indices_table, caption = "Structural Equation Model Fit Indices") %>%
 
 The SEM demonstrated excellent model fit (Table 3), with all fit indices meeting established thresholds for good fit.
 
+```{r sem-diagram, echo=FALSE, fig.cap="SEM Pathway Diagram with High-Contrast Theme", out.width="90%"}
+high_contrast_palette <- c(
+  "#1f77b4", "#ff7f0e",  # Blue-Orange
+  "#2ca02c", "#d62728",  # Green-Red
+  "#9467bd", "#8c564b",  # Purple-Brown
+  "#e377c2", "#7f7f7f"   # Pink-Gray
+)
+# Create custom color mapping for SEM elements
+sem_colors <- list(
+  latent = high_contrast_palette[1],        # Blue for latent variables
+  indigenous = high_contrast_palette[2],    # Orange for Indigenous status
+  diabetes = high_contrast_palette[4],      # Red for diabetes
+  mental_health = high_contrast_palette[3], # Green for mental health
+  access_indicators = high_contrast_palette[5] # Purple for access indicators
+)
+
+# Create the SEM diagram with your theme colors
+sem_diagram <- semPaths(sem_fit,
+                       what = "std",
+                       whatLabels = "std",
+                       style = "lisrel",
+                       layout = "tree2",
+                       rotation = 1,
+                       curvePivot = TRUE,
+                       curve = 1.5,
+                       sizeMan = 10,
+                       sizeLat = 12,
+                       edge.label.cex = 1.3,
+                       label.cex = 1.4,
+                       nodeLabels = c("Indigenous\nStatus", 
+                                     "Diabetes", 
+                                     "Regular\nProvider",
+                                     "Unmet\nNeeds",
+                                     "Mental\nHealth",
+                                     "Healthcare\nAccess"),
+                       color = list(
+                         lat = sem_colors$latent,
+                         man = c(
+                           sem_colors$indigenous,      # indigenous_binary
+                           sem_colors$diabetes,        # has_diabetes  
+                           sem_colors$access_indicators, # has_regular_provider
+                           sem_colors$access_indicators, # has_unmet_needs
+                           sem_colors$mental_health    # poor_mental_health
+                         )
+                       ),
+                       edge.color = "black",
+                       mar = c(6,6,6,6),
+                       nCharNodes = 0,
+                       intercepts = FALSE,
+                       residuals = FALSE,
+                       thresholds = FALSE,
+                       optimizeLatRes = TRUE)
+
+# Add title with your theme styling
+title("Structural Equation Model: Healthcare Access Pathways\nStandardized Coefficients Shown", 
+      line = 2, cex.main = 1.2, col = high_contrast_palette[1])
+
+# Add legend using your theme colors
+legend("bottomright", 
+       legend = c("Latent Construct", "Indigenous Status", "Diabetes", 
+                 "Mental Health", "Access Indicators"),
+       fill = c(sem_colors$latent, sem_colors$indigenous, sem_colors$diabetes,
+               sem_colors$mental_health, sem_colors$access_indicators),
+       cex = 0.8, bty = "n", text.col = high_contrast_palette[3])
+
+# Save high-quality version
+png("figures/sem_pathways.png", width = 12, height = 9, units = "in", res = 300)
+semPaths(sem_fit,
+         what = "std", whatLabels = "std",
+         style = "lisrel", layout = "tree2",
+         rotation = 1, curvePivot = TRUE, curve = 1.5,
+         sizeMan = 10, sizeLat = 12,
+         edge.label.cex = 1.3, label.cex = 1.4,
+         nodeLabels = c("Indigenous\nStatus", "Diabetes", "Regular\nProvider",
+                       "Unmet\nNeeds", "Mental\nHealth", "Healthcare\nAccess"),
+         color = list(
+           lat = sem_colors$latent,
+           man = c(sem_colors$indigenous, sem_colors$diabetes,
+                  sem_colors$access_indicators, sem_colors$access_indicators,
+                  sem_colors$mental_health)
+         ),
+         edge.color = "black", mar = c(6,6,6,6),
+         nCharNodes = 0, intercepts = FALSE, residuals = FALSE)
+title("Structural Equation Model: Healthcare Access Pathways\nStandardized Coefficients Shown", 
+      line = 2, cex.main = 1.2, col = high_contrast_palette[1])
+legend("bottomright", 
+       legend = c("Latent Construct", "Indigenous Status", "Diabetes", 
+                 "Mental Health", "Access Indicators"),
+       fill = c(sem_colors$latent, sem_colors$indigenous, sem_colors$diabetes,
+               sem_colors$mental_health, sem_colors$access_indicators),
+       cex = 0.8, bty = "n", text.col = high_contrast_palette[3])
+dev.off()
+```
+
+
 ```{r sem-results, echo=FALSE}
 kable(significant_paths, caption = "Standardized Parameter Estimates for Significant SEM Pathways", digits = 3) %>%
   kable_styling(bootstrap_options = c("striped", "hover"), full_width = FALSE)
@@ -481,6 +576,10 @@ p_gaps_compact <- gap_analysis %>%
   theme(legend.position = "bottom")
 
 print(p_gaps_compact)
+
+# Save this version
+ggsave("figures/disparity_gaps.png", p_gaps_compact, 
+       width = 10, height = 7, dpi = 300, bg = "white")
 ```
 
 ```{r gap}
