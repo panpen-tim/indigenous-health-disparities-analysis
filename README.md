@@ -16,18 +16,28 @@ This research employs an integrated mixed-methods approach combining **Multiple 
 - Clear separation between Indigenous and non-Indigenous groups in healthcare domain space
 - Significant direct and mediated pathways through healthcare access to health outcomes
 
-## 🎯 Policy Relevance
+## 🎯 Policy Relevance & Professional Alignment
 
-This analysis provides evidence-based insights for Indigenous political organizations including:
-- **Southern Chiefs' Organization (SCO)**
-- **Manitoba Keewatinowi Okimakanak (MKO)** 
-- **Assembly of Manitoba Chiefs (AMC)**
-- **Manitoba Métis Federation (MMF)**
+This research integrates statistical sophistication with deep understanding of territorial political advocacy contexts, demonstrating how advanced analytics can serve Indigenous health sovereignty and evidence-based policy development. It emerges from direct experience with territorial political advocacy in Treaty 1, where evidence-based approaches are essential for advancing Indigenous health equity. The analytical framework responds to longstanding advocacy priorities by:
+
+- **Centering structural determinants** over individual risk factors
+- **Employing nation-aware methodologies** that respect distinct cultural frameworks  
+- **Producing policy-ready evidence** for territorial health advocacy
+- **Validating community-identified priorities** through advanced statistical triangulation
 
 **Key Policy Implications**:
 - Differentiated approaches: Healthcare access reforms for mental health vs. historical trauma interventions for diabetes
 - Unmet healthcare needs as primary intervention target
 - Structural, not individual, framing of health inequities
+
+## 🔬 Analytical Approach
+
+Developed through engagement with territorial health policy contexts, this integrated MFA→SEM→ML workflow demonstrates how sophisticated statistical methods can serve Indigenous health advocacy by:
+
+- Identifying structural barrier hierarchies for targeted intervention
+- Quantifying healthcare access mediation pathways  
+- Providing empirical validation for systemic reform priorities
+- Offering replicable methodology for ongoing health equity monitoring
 
 ## 🏗️ Methodological Framework
 
