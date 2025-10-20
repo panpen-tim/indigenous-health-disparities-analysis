@@ -243,7 +243,7 @@ rf_accuracy <- round(mean(predict(rf_model, test_data) == test_data$indigenous_b
 
 Indigenous health inequities in Canada persist as manifestations of historical trauma and colonial policies that continue to shape contemporary health outcomes (Truth and Reconciliation Commission, 2015). These disparities reflect complex, structurally-mediated pathways rooted in colonial policies, socioeconomic marginalization, and systemic barriers to healthcare access that operate across mental, physical, emotional, and spiritual dimensions of health (Hogg et al., 2024). The over-representation of diabetes among Indigenous populations must be understood within the historical context of inter-generational food insecurity and disrupted relationships with traditional food systems (UWO Commentary, 2024).
 
-In Manitoba, where Indigenous peoples comprise a significant portion of the population, territorial political advocacy organizations have consistently advanced research approaches that center Indigenous ways of knowing and address structural determinants of health. Drawing from professional experience in Indigenous health policy analysis, this research responds to territorial advocacy priorities by employing methodological approaches that respect nation-specific frameworks and honor distinct cultural conceptions of health and wellbeing.
+In Manitoba, the Truth and Reconciliation Commission's Calls to Action 18-24 (2015), which specifically address health disparities, and the United Nations Declaration on the Rights of Indigenous Peoples (UNDRIP, United Nation, 2007) establish the ethical and political imperative for research that addresses structural determinants of Indigenous health. Territorial political advocacy organizations have consistently advanced research sovereignty and methodologies that center Indigenous ways of knowing. Drawing from professional experience in Indigenous health policy analysis, this research responds to these frameworks by employing methodological approaches that respect nation-specific frameworks and honor distinct cultural conceptions of health and wellbeing.
 
 Recent scholarship has critiqued Western research paradigms that fail to acknowledge Indigenous epistemologies or address power imbalances in knowledge production (Flicker et al., 2024). This study responds to these critiques by employing methodological approaches that acknowledge the limitations of survey data in capturing holistic Indigenous health conceptions while maximizing the analytical value of available data through advanced statistical integration.
 
@@ -751,7 +751,13 @@ Thomas, S., & Wannell, B. (2009). Combining cycles of the Canadian Community Hea
 \setlength{\parindent}{-0.5in}
 \setlength{\leftskip}{0.5in}
 \setlength{\parskip}{8pt}
-Truth and Reconciliation Commission of Canada. (2015). *Honouring the truth, reconciling for the future: Summary of the final report of the Truth and Reconciliation Commission of Canada*.
+Truth and Reconciliation Commission of Canada. (2015). *Honouring the truth, reconciling for the future: Summary of the final report of the Truth and Reconciliation Commission of Canada*.  
+
+\setlength{\parindent}{-0.5in}
+\setlength{\leftskip}{0.5in}
+\setlength{\parskip}{8pt}
+United Nations. (2007). *United Nations Declaration on the Rights of Indigenous Peoples*. 
+United Nations General Assembly.  
 
 \setlength{\parindent}{-0.5in}
 \setlength{\leftskip}{0.5in}
