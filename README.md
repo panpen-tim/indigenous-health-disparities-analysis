@@ -18,7 +18,7 @@ This research employs an integrated mixed-methods approach combining **Multiple 
 
 ## 🎯 Policy Relevance & Professional Alignment
 
-This research integrates statistical sophistication with deep understanding of territorial political advocacy contexts, demonstrating how advanced analytics can serve Indigenous health sovereignty and evidence-based policy development. It emerges from direct experience with territorial political advocacy in Treaty 1, where evidence-based approaches are essential for advancing Indigenous health equity. The analytical framework responds to longstanding advocacy priorities by:
+The research integrates statistical sophistication with deep understanding of territorial political advocacy contexts, demonstrating how advanced analytics can serve Indigenous health sovereignty and evidence-based policy development. It emerges from direct experience with territorial political advocacy in Treaty 1, where evidence-based approaches are essential for advancing Indigenous health equity. The analytical framework responds to longstanding advocacy priorities by:
 
 - **Centering structural determinants** over individual risk factors
 - **Employing nation-aware methodologies** that respect distinct cultural frameworks  
@@ -32,7 +32,7 @@ This research integrates statistical sophistication with deep understanding of t
 
 ## 🔬 Analytical Approach
 
-Developed through engagement with territorial health policy contexts, this integrated MFA→SEM→ML workflow demonstrates how sophisticated statistical methods can serve Indigenous health advocacy by:
+Developed through engagement with territorial health policy contexts, the integrated MFA→SEM→ML workflow demonstrates how sophisticated statistical methods can serve Indigenous health advocacy by:
 
 - Identifying structural barrier hierarchies for targeted intervention
 - Quantifying healthcare access mediation pathways  
@@ -125,7 +125,7 @@ source("render_report.R")
 HealthIneq/
 ├── cchs.Rmd                                # Main analysis document
 ├── cchs.pdf                                # Complete technical report
-├── README.md                               # This file
+├── README.md                               # The file
 ├── render_report.R                         # One-click PDF generation
 ├── figures/                                # Generated visualizations
 │   ├── mfa_analysis.png
@@ -150,7 +150,7 @@ HealthIneq/
 
 ## 🎓 Statistical Sophistication
 
-This project demonstrates advanced methodological integration:
+The project demonstrates advanced methodological integration:
 
 - **Multiple Factor Analysis**: Exploratory structural pattern discovery
 - **Structural Equation Modeling**: Confirmatory causal pathway testing with latent variables
@@ -176,7 +176,7 @@ This project demonstrates advanced methodological integration:
 
 ## 🔧 Generating Graphics for README
 
-To generate the graphics shown in this README, run the following code chunks from the RMD file:
+To generate the graphics shown in the README, run the following code chunks from the RMD file:
 ```r
 # MFA Plot
 ggsave("figures/mfa_analysis.png", mfa_plot, width=10, height=6, dpi=300)
@@ -194,7 +194,7 @@ ggsave("figures/disparity_gaps.png", p_gaps_compact,
 
 ## 🤝 Contributing
 
-This research acknowledges the importance of:
+The research acknowledges the importance of:
 - Cultural safety as prerequisite for healthcare
 - Four directions of healing (mental, physical, emotional, spiritual)
 - Lived expertise of Indigenous communities
@@ -203,7 +203,7 @@ This research acknowledges the importance of:
 
 ## 📜 License
 
-This project is intended for academic and policy use. Please cite appropriately when using findings or methodology.
+The project is intended for academic and policy use. Please cite appropriately when using findings or methodology.
 
 ## 📫 Connect
 
@@ -213,4 +213,4 @@ This project is intended for academic and policy use. Please cite appropriately 
 
 ---
 
-**Note**: This research was conducted with respect for Indigenous data sovereignty and the principles of OCAP® (Ownership, Control, Access, and Possession). Findings should be contextualized within historical trauma and colonial policies affecting Indigenous health outcomes.
+**Note**: The research was conducted with respect for Indigenous data sovereignty and the principles of OCAP® (Ownership, Control, Access, and Possession). Findings should be contextualized within historical trauma and colonial policies affecting Indigenous health outcomes.
