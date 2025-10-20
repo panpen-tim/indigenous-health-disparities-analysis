@@ -7,37 +7,33 @@
 
 ## 📊 Project Overview
 
-This research employs an integrated mixed-methods approach combining **Multiple Factor Analysis (MFA)**, **Structural Equation Modeling (SEM)**, and **Machine Learning** to examine structural determinants of Indigenous health disparities using Canadian Community Health Survey (CCHS) data (2015-2018).
+This research employs an integrated mixed-methods approach combining **Multiple Factor Analysis (MFA)**, **Structural Equation Modeling (SEM)**, and **Machine Learning** to examine structural determinants of Indigenous health disparities using Canadian Community Health Survey (CCHS) data (2015-2018). Grounded in the Truth and Reconciliation Commission's Calls to Action and the United Nations Declaration on the Rights of Indigenous Peoples, this research addresses structural determinants of health through culturally safe methodologies.
 
 **Key Findings**:
-- Unmet healthcare needs is the strongest predictor of Indigenous status (Gini importance = 214.1)
-- Structural access dimensions explain 56.5% of healthcare disparity variance
+- **Unmet healthcare needs** identified as strongest predictor of Indigenous status (Gini importance = 223.3)
+- **Random Forest accuracy**: 85.4% in distinguishing Indigenous vs non-Indigenous respondents
+- **Clear predictor hierarchy**: Unmet needs > regular provider > healthcare access > diabetes > mental health
 - **Divergent pathways**: 72% of mental health disparity mediated by healthcare access vs. diabetes showing direct historical trauma effects
-- Clear separation between Indigenous and non-Indigenous groups in healthcare domain space
-- Significant direct and mediated pathways through healthcare access to health outcomes
+- **Clear separation** between Indigenous and non-Indigenous groups in healthcare domain space
+- Significant direct and mediated **pathways through healthcare access to health outcomes**
 
 ## 🎯 Policy Relevance & Professional Alignment
 
-The research integrates statistical sophistication with deep understanding of territorial political advocacy contexts, demonstrating how advanced analytics can serve Indigenous health sovereignty and evidence-based policy development. It emerges from direct experience with territorial political advocacy in Treaty 1, where evidence-based approaches are essential for advancing Indigenous health equity. The analytical framework responds to longstanding advocacy priorities by:
+The research integrates statistical sophistication with deep understanding of territorial political advocacy contexts, demonstrating how advanced analytics can serve Indigenous health sovereignty and evidence-based policy development. It emerges from direct experience with territorial political advocacy in Treaty 1, where evidence-based approaches are essential for advancing Indigenous health equity. The analytical framework arms territorial political organizations (SCO, MKO, AMC, MMF) to respond to longstanding advocacy priorities with the evidence-based insights that:
 
-- **Centering structural determinants** over individual risk factors
-- **Employing nation-aware methodologies** that respect distinct cultural frameworks  
-- **Producing policy-ready evidence** for territorial health advocacy
-- **Validating community-identified priorities** through advanced statistical triangulation
-
-**Key Policy Implications**:
-- Differentiated approaches: Healthcare access reforms for mental health vs. historical trauma interventions for diabetes
-- Unmet healthcare needs as primary intervention target
-- Structural, not individual, framing of health inequities
-
+- **Center structural determinants** over individual risk factors based on empirical feature importance
+- **Differentiate pathways** between diabetes (historical trauma) and mental health (healthcare access mediation)
+- **Validate structural frameworks** for health equity advocacy through statistical triangulation
+- **Support TRC Call to Action 19** implementation through data-driven approaches
+- 
 ## 🔬 Analytical Approach
 
 Developed through engagement with territorial health policy contexts, the integrated MFA→SEM→ML workflow demonstrates how sophisticated statistical methods can serve Indigenous health advocacy by:
 
-- Identifying structural barrier hierarchies for targeted intervention
-- Quantifying healthcare access mediation pathways  
-- Providing empirical validation for systemic reform priorities
-- Offering replicable methodology for ongoing health equity monitoring
+- Identifying **structural barrier hierarchies** for targeted intervention
+- Quantifying healthcare access **mediation pathways**  
+- Providing **empirical validation** for systemic reform priorities
+- Offering **replicable methodology** for ongoing health equity monitoring
 
 ## 🏗️ Methodological Framework
 
@@ -97,16 +93,12 @@ rf_model <- randomForest(predictors)       # Feature importance ranking
 
 ### Prerequisites
 ```r
-# Required R packages
-r_pack = c(
-  "tidyverse", "FactoMineR", "factoextra", "dplyr", "lavaan", "stringr",
-  "cchsflow", "haven", "randomForest", "ggforce",
-  "ggplot2", "viridis", "RColorBrewer", "kableExtra", "ggpubr",
-  "corrplot", "GGally", "patchwork", "scales", "ggridges", "pROC","semPlot"
-)
-new_r = r_pack[!(r_pack %in% installed.packages()[,"Package"])]
-if(length(new_r)) install.packages(new_r)
-for(pac in r_pack) library(pac, character.only=T)
+# Key packages used
+library(FactoMineR)    # Multiple Factor Analysis
+library(lavaan)        # Structural Equation Modeling  
+library(randomForest)  # Machine Learning
+library(ggplot2)       # High-contrast visualizations
+library(kableExtra)    # Professional APA tables
 ```
 
 ### Data Preparation
@@ -195,6 +187,11 @@ ggsave("figures/sem_pathways.png", sem_diagram, width=8, height=6, dpi=300)
 ggsave("figures/disparity_gaps.png", p_gaps_compact,
        width = 8, height = 5, dpi = 300)
 ```
+
+## 📚 Foundational Frameworks
+
+- Truth and Reconciliation Commission of Canada (2015). *Calls to Action*
+- United Nations Declaration on the Rights of Indigenous Peoples (2007)
 
 ## 🤝 Contributing
 
