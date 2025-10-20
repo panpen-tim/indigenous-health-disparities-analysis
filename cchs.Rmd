@@ -313,6 +313,8 @@ kable(sample_table, caption = "Sample Characteristics and Health Indicator Preva
 
 ## Multiple Factor Analysis: Structural Patterning of Health Disparities
 ```{r mfa-plot, fig.cap="MFA", fig.width=6, fig.height=3.5}
+indigenous_groups <- analysis_data[rownames(mfa_data), "indigenous_group"]
+
 p1 <- fviz_mfa_var(mfa_result, "group", 
                    col.var = "contrib",
                    gradient.cols = get_contrast_gradient(),
@@ -320,14 +322,15 @@ p1 <- fviz_mfa_var(mfa_result, "group",
                    title = "A) MFA - Healthcare Domain Contributions")
 
 p2 <- fviz_mfa_ind(mfa_result, 
-                   habillage = as.factor(analysis_data[rownames(mfa_data), "indigenous_binary"]),
-                   palette = get_contrast_palette(2),
+                   habillage = indigenous_groups,
+                   palette = get_contrast_palette(4),  # Need 4 colors for 4 groups
                    addEllipses = TRUE, ellipse.level = 0.95,
-                   title = "B) MFA - Indigenous vs Non-Indigenous Distribution",
-                   legend.title = "Indigenous Status")
+                   title = "B) MFA - Distribution by Indigenous Group",
+                   legend.title = "Indigenous Group")
 
 mfa_plot <- ggarrange(p1, p2, ncol = 2, widths = c(1, 1.2))
 print(mfa_plot)
+ggsave("figures/mfa_analysis.png", mfa_plot, width=10, height=6, dpi=300)
 ```
 
 ```{r mfa-variance, echo=FALSE}
@@ -492,7 +495,7 @@ p_importance <- importance_df %>%
   mutate(Variable = factor(Variable, levels = Variable[order(MeanDecreaseGini)])) %>%
   ggplot(aes(x = MeanDecreaseGini, y = reorder(Variable, MeanDecreaseGini), fill = MeanDecreaseGini)) +
   geom_col() +
-  scale_fill_gradientn(colors = get_contrast_gradient()) +
+  scale_fill_gradientn(colors = get_contrast_palette(10)%>%sample(5)) +
   labs(
     title = "Feature Importance for Indigenous Status Prediction",
     subtitle = "Random Forest Mean Decrease in Gini Index",
@@ -502,6 +505,7 @@ p_importance <- importance_df %>%
   theme(legend.position = "none")
 
 print(p_importance)
+ggsave("figures/feature_importance.png", p_importance, width=8, height=5, dpi=300)
 ```
 
 Machine learning analysis identified unmet healthcare needs as the strongest predictor of Indigenous status (Figure 2), with a Gini importance of `r round(importance_df$MeanDecreaseGini[1], 1)`. The Random Forest model achieved an accuracy of `r round(mean(predict(rf_model, test_data) == test_data$indigenous_binary), 3)` in distinguishing Indigenous from non-Indigenous respondents based solely on health and access variables.
@@ -560,14 +564,15 @@ gap_analysis <- disparity_summary %>%
   )
 
 # Create the disparity gaps plot
+col_temp=get_contrast_palette(5)
 p_gaps_compact <- gap_analysis %>%
   select(indigenous_group, ends_with("_Gap")) %>%
   pivot_longer(cols = -indigenous_group, names_to = "Gap_Type", values_to = "Gap_Size") %>%
   mutate(Gap_Type = str_remove(Gap_Type, "_Gap")) %>%
   ggplot(aes(x = Gap_Size, y = reorder(indigenous_group, Gap_Size), fill = Gap_Type)) +
   geom_col(position = "dodge", width = 0.7) +
-  geom_vline(xintercept = 0, linetype = "dashed", color = "red", alpha = 0.7) +
-  scale_fill_brewer(palette = "Set2", name = "Health Indicator") +
+  geom_vline(xintercept = 0, linetype = "dashed", color = col_temp[5], alpha = 0.7) +
+  scale_fill_manual(name = "Health Indicator", values = col_temp[1:4])+
   labs(
     title = "Health Disparity Gaps: Indigenous vs Non-Indigenous",
     x = "Percentage Point Gap (Indigenous - Non-Indigenous)",
