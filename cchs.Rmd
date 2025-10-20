@@ -266,7 +266,7 @@ The 2015-2016 and 2017-2018 CCHS cycles were harmonized and pooled as a cross-se
 
 3. **Policy Relevance**: Territorial organizations require contemporary, population-level estimates of structural barriers. Pooling the most recent available cycles provides the largest possible sample for identifying current disparity patterns relevant to ongoing policy advocacy.
 
-The approach follows established methodologies for analyzing health disparities using pooled CCHS cycles (cite relevant methodology papers if available).
+The approach follows established methodologies for analyzing health disparities using pooled CCHS cycles (Thomas and Wannell, 2009).
 
 ## Measures
 
@@ -738,7 +738,12 @@ https://abacus.library.ubc.ca/dataset.xhtml?persistentId=hdl:11272.1/AB2/SEB16A
 \setlength{\leftskip}{0.5in}
 \setlength{\parskip}{8pt}
 Statistics Canada. (2023). *Ethical guidelines for statistical projects*. 
-https://www.statcan.gc.ca/en/about/policy/ethical-guidelines
+https://www.statcan.gc.ca/en/about/policy/ethical-guidelines  
+
+\setlength{\parindent}{-0.5in}
+\setlength{\leftskip}{0.5in}
+\setlength{\parskip}{8pt}
+Thomas, S., & Wannell, B. (2009). Combining cycles of the Canadian Community Health Survey. *Health Reports, 20*(1), 53–58  
 
 \setlength{\parindent}{-0.5in}
 \setlength{\leftskip}{0.5in}
