@@ -240,7 +240,7 @@ importance_df <- as.data.frame(rf_model$importance) %>%
 
 Indigenous health inequities in Canada persist as manifestations of historical trauma and colonial policies that continue to shape contemporary health outcomes (Truth and Reconciliation Commission, 2015). These disparities reflect complex, structurally-mediated pathways rooted in colonial policies, socioeconomic marginalization, and systemic barriers to healthcare access that operate across mental, physical, emotional, and spiritual dimensions of health (Hogg et al., 2024). The over-representation of diabetes among Indigenous populations must be understood within this historical context of inter-generational food insecurity and disrupted relationships with traditional food systems (UWO Commentary, 2024).
 
-In Manitoba, where Indigenous peoples comprise a significant portion of the population, political organizations such as the Southern Chiefs\' Organization (SCO), Manitoba Keewatinowi Okimakanak (MKO), Assembly of Manitoba Chiefs (AMC), and Manitoba Métis Federation (MMF) have consistently advocated for research approaches that center Indigenous ways of knowing and address structural determinants of health. The Manitoba Métis Federation serves as the democratic and self-governing representative body of the Manitoba Métis Community, emphasizing nation-specific approaches to health policy that honor distinct cultural frameworks.
+In Manitoba, where Indigenous peoples comprise a significant portion of the population, territorial political advocacy organizations have consistently advanced research approaches that center Indigenous ways of knowing and address structural determinants of health. Drawing from professional experience in Indigenous health policy analysis, this research responds to territorial advocacy priorities by employing methodological approaches that respect nation-specific frameworks and honor distinct cultural conceptions of health and wellbeing.
 
 Recent scholarship has critiqued Western research paradigms that fail to acknowledge Indigenous epistemologies or address power imbalances in knowledge production (Flicker et al., 2024). This study responds to these critiques by employing methodological approaches that acknowledge the limitations of survey data in capturing holistic Indigenous health conceptions while maximizing the analytical value of available data through advanced statistical integration.
 
@@ -683,26 +683,6 @@ For policy analysts working with territorial political organizations, this analy
 \setlength{\parindent}{-0.5in}
 \setlength{\leftskip}{0.5in}
 \setlength{\parskip}{8pt}
-Flicker, S., et al. (2024). "Nothing about us without us": The promises and pitfalls of participatory action research with Indigenous communities. *Nursing Inquiry*.  
-
-\setlength{\parindent}{-0.5in}
-\setlength{\leftskip}{0.5in}
-\setlength{\parskip}{8pt}
-Hogg, R., et al. (2024). Cultural safety in healthcare systems: A systematic review of intervention characteristics and outcomes. *International Journal for Quality in Health Care*.  
-
-\setlength{\parindent}{-0.5in}
-\setlength{\leftskip}{0.5in}
-\setlength{\parskip}{8pt}
-Truth and Reconciliation Commission of Canada. (2015). *Honouring the truth, reconciling for the future: Summary of the final report of the Truth and Reconciliation Commission of Canada*.  
-
-\setlength{\parindent}{-0.5in}
-\setlength{\leftskip}{0.5in}
-\setlength{\parskip}{8pt}
-University of Western Ontario Commentary. (2024). *Indigenous health inequity: Understanding our journey to understand our health*. Global Health Equity Blog.  
-
-\setlength{\parindent}{-0.5in}
-\setlength{\leftskip}{0.5in}
-\setlength{\parskip}{8pt}
 Breiman, L. (2001). Random forests. *Machine Learning*, 45(1), 5-32.  
 
 \setlength{\parindent}{-0.5in}
@@ -713,17 +693,32 @@ Chen, T., & Guestrin, C. (2016). XGBoost: A scalable tree boosting system. *Proc
 \setlength{\parindent}{-0.5in}
 \setlength{\leftskip}{0.5in}
 \setlength{\parskip}{8pt}
+Flicker, S., et al. (2024). "Nothing about us without us": The promises and pitfalls of participatory action research with Indigenous communities. *Nursing Inquiry*.  
+
+\setlength{\parindent}{-0.5in}
+\setlength{\leftskip}{0.5in}
+\setlength{\parskip}{8pt}
+Hogg, R., et al. (2024). Cultural safety in healthcare systems: A systematic review of intervention characteristics and outcomes. *International Journal for Quality in Health Care*.  
+
+\setlength{\parindent}{-0.5in}
+\setlength{\leftskip}{0.5in}
+\setlength{\parskip}{8pt}
 Husson, F., Lé, S., & Pagès, J. (2010). *Exploratory multivariate analysis by example using R*. CRC press.  
 
 \setlength{\parindent}{-0.5in}
 \setlength{\leftskip}{0.5in}
 \setlength{\parskip}{8pt}
-Kline, R. B. (2015). *Principles and practice of structural equation modeling*. Guilford publications.  
+Kline, R. B. (2015). *Principles and practice of structural equation modeling*. Guilford publications.
 
 \setlength{\parindent}{-0.5in}
 \setlength{\leftskip}{0.5in}
 \setlength{\parskip}{8pt}
-Manitoba Métis Federation. (2022). *Pulling Together: Métis Foundations Guide*.  
+Truth and Reconciliation Commission of Canada. (2015). *Honouring the truth, reconciling for the future: Summary of the final report of the Truth and Reconciliation Commission of Canada*.
+
+\setlength{\parindent}{-0.5in}
+\setlength{\leftskip}{0.5in}
+\setlength{\parskip}{8pt}
+University of Western Ontario Commentary. (2024). *Indigenous health inequity: Understanding our journey to understand our health*. Global Health Equity Blog.
 
 **Note:** Additional references from the provided literature have been integrated throughout the document.
 
