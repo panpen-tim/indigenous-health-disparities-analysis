@@ -1,0 +1,20 @@
+# .gitignore
+# Data files (too large for git)
+*.csv
+*.RData
+*.rda
+
+# Output files
+*.html
+
+# R environment
+.Rproj.user
+.Rhistory
+.RData
+.Ruserdata
+
+# Temporary files
+*.log
+*.aux
+*.out
+*.toc
