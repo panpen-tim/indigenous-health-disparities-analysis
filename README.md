@@ -98,11 +98,15 @@ rf_model <- randomForest(predictors)       # Feature importance ranking
 ### Prerequisites
 ```r
 # Required R packages
-install.packages(c(
-  "tidyverse", "FactoMineR", "factoextra", "lavaan", 
-  "randomForest", "xgboost", "kableExtra", "ggpubr",
-  "pROC", "patchwork"
-))
+r_pack = c(
+  "tidyverse", "FactoMineR", "factoextra", "dplyr", "lavaan", "stringr",
+  "cchsflow", "haven", "randomForest", "ggforce",
+  "ggplot2", "viridis", "RColorBrewer", "kableExtra", "ggpubr",
+  "corrplot", "GGally", "patchwork", "scales", "ggridges", "pROC","semPlot"
+)
+new_r = r_pack[!(r_pack %in% installed.packages()[,"Package"])]
+if(length(new_r)) install.packages(new_r)
+for(pac in r_pack) library(pac, character.only=T)
 ```
 
 ### Data Preparation
@@ -154,7 +158,7 @@ The project demonstrates advanced methodological integration:
 
 - **Multiple Factor Analysis**: Exploratory structural pattern discovery
 - **Structural Equation Modeling**: Confirmatory causal pathway testing with latent variables
-- **Machine Learning Ensemble**: Predictive feature importance ranking with Random Forest/XGBoost
+- **Machine Learning Ensemble**: Predictive feature importance ranking with Random Forest
 - **High-Contrast Visualization**: Accessible, publication-ready graphics
 - **Cultural Safety Framework**: Historical trauma and four directions of healing integration
 
