@@ -261,15 +261,17 @@ The analysis used pooled Canadian Community Health Survey (CCHS) data from 2015-
 
 ## Data Harmonization and Cross-Sectional Design Justification
 
-The 2015-2016 and 2017-2018 CCHS cycles were harmonized and pooled as a cross-sectional sample rather than analyzed longitudinally for three methodological and substantive reasons:
+The 2015-2016 and 2017-2018 CCHS cycles were harmonized and pooled as a cross-sectional sample rather than analyzed longitudinally for four methodological and substantive reasons:
 
-1. **Sample Size Considerations**: Pooling cycles increased statistical power for analyzing Indigenous health disparities, particularly for subgroup analyses (First Nations, Métis, Inuit) where individual cycle sample sizes would be insufficient for robust multivariate analysis.
+1. **Sample Size and Dimensionality Requirements**: Pooling cycles (N = `r nrow(analysis_data)`) addresses critical sample size requirements for multivariate methods. For Multiple Factor Analysis with 5 observed variables and Structural Equation Modeling testing complex pathways, established methodological guidelines recommend minimum samples of 100-200 cases for stable parameter estimation (Kline, 2015; Wolf et al., 2013). Our pooled sample provides robust statistical power for detecting the small-to-medium effect sizes characteristic of health disparities research.
 
-2. **Cross-Sectional Design of CCHS**: While CCHS collects some longitudinal data, the public use microdata files do not include person-level identifiers necessary for longitudinal linkage across cycles. The survey design treats each cycle as an independent cross-sectional sample.
+2. **Indigenous Subgroup Analysis**: Individual CCHS cycles contain insufficient cases for robust Indigenous subgroup analyses (First Nations, Métis, Inuit). Pooling addresses this sampling limitation while maintaining methodological coherence, following precedents in Indigenous health research (Smylie & Firestone, 2016).
 
-3. **Policy Relevance**: Territorial organizations require contemporary, population-level estimates of structural barriers. Pooling the most recent available cycles provides the largest possible sample for identifying current disparity patterns relevant to ongoing policy advocacy.
+3. **Cross-Sectional Design of CCHS**: The public use microdata files lack person-level identifiers necessary for longitudinal linkage across cycles. The survey design treats each cycle as an independent cross-sectional sample, making pooled cross-sectional analysis the methodologically appropriate approach for maximizing contemporary data utility.
 
-The approach follows established methodologies for analyzing health disparities using pooled CCHS cycles (Thomas and Wannell, 2009).
+4. **Policy Relevance and Contemporary Evidence**: Territorial organizations require current, population-level estimates of structural barriers for advocacy and program planning. Pooling the most recent available cycles provides the largest possible sample for identifying current disparity patterns, balancing methodological rigor with practical policy needs.
+
+This approach follows established methodologies for analyzing health disparities using pooled CCHS cycles (Thomas & Wannell, 2009) and aligns with sample size recommendations for complex multivariate modeling in health research.
 
 ## Measures
 
@@ -327,7 +329,7 @@ kable(sample_table, caption = "Sample Characteristics and Health Indicator Preva
 *Table 1*. Health disparities are evident across all domains, with diabetes prevalence notably higher among Indigenous groups, contextualized within historical and intergenerational food insecurity pathways.
 
 ## Multiple Factor Analysis: Structural Patterning of Health Disparities
-```{r mfa-plot, fig.cap="MFA", fig.width=6, fig.height=3.5}
+```{r mfa-plot, fig.cap="Multiple Factor Analysis: Structural Patterning of Healthcare Access Disparities", fig.width=6, fig.height=3}
 indigenous_groups <- analysis_data[rownames(mfa_data), "indigenous_group"]
 
 p1 <- fviz_mfa_var(mfa_result, "group", 
@@ -385,7 +387,7 @@ kable(fit_indices_table, caption = "Structural Equation Model Fit Indices") %>%
 
 The SEM demonstrated excellent model fit (Table 3), with all fit indices meeting established thresholds for good fit.
 
-```{r sem-diagram0, echo=FALSE, fig.cap="SEM Pathway Diagram with High-Contrast Theme", out.width="80%", fig.height=8}
+```{r sem-diagram0, echo=FALSE, fig.cap="SEM Pathway Diagram with High-Contrast Theme", out.width="80%", fig.height=7}
 library(semPlot)
 high_contrast_palette <- c(
   "#1f77b4", "#ff7f0e",  # Blue-Orange
@@ -455,7 +457,7 @@ legend("bottom",
        horiz = FALSE, ncol = 2, xpd = TRUE, inset = c(0, 0.02))
 ```
 
-```{r sem-diagram, echo=FALSE, fig.cap="SEM Pathway Diagram with High-Contrast Theme", out.width="80%", fig.height=8,include=F}
+```{r sem-diagram, echo=FALSE, fig.cap="Structural Equation Model of Indigenous Health Disparities: Direct and Mediated Pathways", out.width="80%",include=F}
 # Ensure figures directory exists
 if(!dir.exists("figures")) dir.create("figures")
 
@@ -500,13 +502,13 @@ legend("bottom",
 dev.off()
 ```
 
-
 ```{r sem-results, echo=FALSE}
 kable(significant_paths, caption = "Standardized Parameter Estimates for Significant SEM Pathways", digits = 3) %>%
   kable_styling(bootstrap_options = c("striped", "hover"), full_width = FALSE)
 ```
 
 ### Table 4. Interpretation of SEM Pathways:
+The structural pathways are visualized in Figure 2, which illustrates the direct effects of Indigenous status on diabetes and the mediated pathways through healthcare access to mental health outcomes. The diagram confirms the measurement model validity with strong factor loadings and demonstrates the divergent causal pathways between health outcomes.
 
 #### Measurement Model (Healthcare Access Construct):
 **Healthcare Access $= \sim$ Unmet Needs ($\beta$ = `r round(sem_results[sem_results$lhs=="healthcare_access" & sem_results$rhs=="has_unmet_needs", "std.all"], 3)`)**: Unmet healthcare needs strongly defines the latent healthcare access variable, validating our measurement model and confirming unmet needs as the primary indicator of structural access barriers.
@@ -568,7 +570,7 @@ kable(feature_interpretation_table, caption = "Random Forest Feature Importance 
   column_spec(c(2,3), width = c("1.5cm","8cm"))
 ```
 
-Machine learning analysis identified unmet healthcare needs as the strongest predictor of Indigenous status (Figure 2), with a Gini importance of `r round(importance_df$MeanDecreaseGini[1], 1)`—nearly double the importance of the second-ranked predictor. The Random Forest model achieved 85.4% accuracy in distinguishing Indigenous from non-Indigenous respondents based solely on health and access variables. The clear hierarchy of predictors (`r paste(importance_df$Variable, sep=" > ")`) provides empirical prioritization for policy interventions.
+Machine learning analysis identified unmet healthcare needs as the strongest predictor of Indigenous status (Figure 3), with a Gini importance of `r round(importance_df$MeanDecreaseGini[1], 1)`—nearly double the importance of the second-ranked predictor. The Random Forest model achieved 85.4% accuracy in distinguishing Indigenous from non-Indigenous respondents based solely on health and access variables. The clear hierarchy of predictors (`r paste(importance_df$Variable, sep=" > ")`) provides empirical prioritization for policy interventions.
 
 \newpage
 
@@ -643,7 +645,7 @@ gap_table <- gap_analysis %>%
 kable(gap_table, caption = "Percentage Point Gaps in Health Indicators (Indigenous - Non-Indigenous)") %>%
   kable_styling(bootstrap_options = c("striped", "hover"), full_width = FALSE)
 ```
-The disparity gaps visualization (Figure 3) shows percentage point differences between Indigenous groups and the non-Indigenous reference population. The red dashed line at zero represents the non-Indigenous baseline. Bars extending to the right indicate higher prevalence among Indigenous groups, while bars extending to the left would indicate lower prevalence. First Nations populations experience the largest gaps in unmet healthcare needs (`r round(gap_analysis$Unmet_Gap[1], 1)` percentage points higher) and diabetes prevalence (`r round(gap_analysis$Diabetes_Gap[1], 1)` percentage points higher), while Métis populations show substantial gaps in unmet healthcare needs (`r round(gap_analysis$Unmet_Gap[2], 1)` percentage points) and mental health indicators.
+The disparity gaps visualization (Figure 4) shows percentage point differences between Indigenous groups and the non-Indigenous reference population. The red dashed line at zero represents the non-Indigenous baseline. Bars extending to the right indicate higher prevalence among Indigenous groups, while bars extending to the left would indicate lower prevalence. First Nations populations experience the largest gaps in unmet healthcare needs (`r round(gap_analysis$Unmet_Gap[1], 1)` percentage points higher) and diabetes prevalence (`r round(gap_analysis$Diabetes_Gap[1], 1)` percentage points higher), while Métis populations show substantial gaps in unmet healthcare needs (`r round(gap_analysis$Unmet_Gap[2], 1)` percentage points) and mental health indicators.
 
 \newpage
 
@@ -728,6 +730,11 @@ Kline, R. B. (2015). *Principles and practice of structural equation modeling*. 
 \setlength{\parindent}{-0.5in}
 \setlength{\leftskip}{0.5in}
 \setlength{\parskip}{8pt}
+Smylie, J., & Firestone, M. (2016). The health of Indigenous peoples. In D. Raphael (Ed.), *Social determinants of health: Canadian perspectives*. Canadian Scholars' Press.  
+
+\setlength{\parindent}{-0.5in}
+\setlength{\leftskip}{0.5in}
+\setlength{\parskip}{8pt}
 Statistics Canada. (2018). *Canadian Community Health Survey (CCHS) - 2015-2016 Annual component* [Data set]. Odesi.
 https://odesi.ca/en/details?id=/odesi/doi\_\_10-5683\_SP3\_YJBSEJ.xml
 
@@ -762,7 +769,12 @@ United Nations General Assembly.
 \setlength{\parindent}{-0.5in}
 \setlength{\leftskip}{0.5in}
 \setlength{\parskip}{8pt}
-University of Western Ontario Commentary. (2024). *Indigenous health inequity: Understanding our journey to understand our health*. Global Health Equity Blog.
+University of Western Ontario Commentary. (2024). *Indigenous health inequity: Understanding our journey to understand our health*. Global Health Equity Blog.  
+
+\setlength{\parindent}{-0.5in}
+\setlength{\leftskip}{0.5in}
+\setlength{\parskip}{8pt}
+Wolf, E. J., Harrington, K. M., Clark, S. L., & Miller, M. W. (2013). Sample size requirements for structural equation models: An evaluation of power, bias, and solution propriety. *Educational and Psychological Measurement*, 73(6), 913-934.  
 
 **Note:** Additional references from the provided literature have been integrated throughout the document.  
 
