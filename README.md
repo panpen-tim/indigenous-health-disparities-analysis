@@ -9,7 +9,10 @@
 
 This research employs an integrated mixed-methods approach combining **Multiple Factor Analysis (MFA)**, **Structural Equation Modeling (SEM)**, and **Machine Learning** to examine structural determinants of Indigenous health disparities using Canadian Community Health Survey (CCHS) data (2015-2018). Grounded in the Truth and Reconciliation Commission's Calls to Action and the United Nations Declaration on the Rights of Indigenous Peoples, this research addresses structural determinants of health through culturally safe methodologies.
 
-**Key Findings**:
+### 🎯 Key Findings
+
+- **Data Integration**: Pooled CCHS 2015-2018 cycles (N = 216501) following established harmonization protocols to ensure adequate sample size for multivariate analysis of Indigenous subgroups
+- **Structural access barriers** explain the majority of healthcare disparity variance
 - **Unmet healthcare needs** identified as strongest predictor of Indigenous status (Gini importance = 223.3)
 - **Random Forest accuracy**: 85.4% in distinguishing Indigenous vs non-Indigenous respondents
 - **Clear predictor hierarchy**: Unmet needs > regular provider > healthcare access > diabetes > mental health
@@ -77,17 +80,13 @@ graph TD
 - Indigenous data sovereignty principles
 
 ### Methodological Innovation
+The pooling of CCHS 2015-2018 cycles follows rigorous harmonization protocols to ensure adequate sample size for robust analysis of Indigenous health disparities.
 ```r
 # Integrated workflow demonstrating statistical sophistication
 mfa_result <- MFA(health_domains)          # Structural pattern discovery
 sem_fit <- sem(access_pathways)            # Causal pathway testing  
 rf_model <- randomForest(predictors)       # Feature importance ranking
 ```
-
-### High-Contrast Academic Visualization
-- Publication-ready color schemes
-- Accessibility-focused design
-- APA-style figure formatting
 
 ## 🚀 Quick Start
 
@@ -99,6 +98,7 @@ library(lavaan)        # Structural Equation Modeling
 library(randomForest)  # Machine Learning
 library(ggplot2)       # High-contrast visualizations
 library(kableExtra)    # Professional APA tables
+library(patchwork)     # Plot arrangement
 ```
 
 ### Data Preparation
