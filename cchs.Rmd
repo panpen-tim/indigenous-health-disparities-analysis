@@ -507,22 +507,13 @@ kable(significant_paths, caption = "Standardized Parameter Estimates for Signifi
   kable_styling(bootstrap_options = c("striped", "hover"), full_width = FALSE)
 ```
 
-### Table 4. Interpretation of SEM Pathways:
-The structural pathways are visualized in Figure 2, which illustrates the direct effects of Indigenous status on diabetes and the mediated pathways through healthcare access to mental health outcomes. The diagram confirms the measurement model validity with strong factor loadings and demonstrates the divergent causal pathways between health outcomes.
+The SEM results (Table 4) reveal distinct healthcare disparity pathways, with strong measurement model validity ($\beta$ = 0.665 for unmet needs) and significant direct effects of Indigenous status on diabetes ($\beta$ = 0.033, p < .001). Figure 2 visualizes these structural relationships, highlighting:
 
-#### Measurement Model (Healthcare Access Construct):
-**Healthcare Access $= \sim$ Unmet Needs ($\beta$ = `r round(sem_results[sem_results$lhs=="healthcare_access" & sem_results$rhs=="has_unmet_needs", "std.all"], 3)`)**: Unmet healthcare needs strongly defines the latent healthcare access variable, validating our measurement model and confirming unmet needs as the primary indicator of structural access barriers.
+1. **Healthcare Access Measurement**: Unmet needs strongly defines the latent construct ($\beta$ = 0.665), validating it as the primary indicator of structural barriers
+2. **Diabetes Pathway**: Direct Indigenous effect ($\beta$ = 0.033) operating outside healthcare access mediation
+3. **Mental Health Mediation**: Primarily through healthcare access ($\beta$ = -0.041) with minimal direct Indigenous effects ($\beta$ = 0.016)
 
-#### Structural Model (Causal Pathways):  
-
-1. **Diabetes $\sim$ Indigenous Status ($\beta$ = `r round(sem_results[sem_results$lhs=="has_diabetes" & sem_results$rhs=="indigenous_binary", "std.all"], 3)`)**: Direct effect showing Indigenous identity predicts higher diabetes prevalence, operating outside healthcare access mediation—likely through historical trauma and intergenerational pathways.
-
-2. **Mental Health $\sim$ Healthcare Access ($\beta$ = `r round(sem_results[sem_results$lhs=="poor_mental_health" & sem_results$rhs=="healthcare_access", "std.all"], 3)`)**: Better healthcare access significantly predicts better mental health, demonstrating the mediating role of structural barriers.
-
-3. **Mental Health $\sim$ Indigenous Status ($\beta$ = `r round(sem_results[sem_results$lhs=="poor_mental_health" & sem_results$rhs=="indigenous_binary", "std.all"], 3)`)**: Minimal direct effect, indicating mental health disparities operate primarily through healthcare access mediation rather than direct Indigenous status effects.
-
-### Key Insight: 
-`r round((abs(sem_results[sem_results$lhs=="poor_mental_health" & sem_results$rhs=="healthcare_access", "std.all"]) / (abs(sem_results[sem_results$lhs=="poor_mental_health" & sem_results$rhs=="healthcare_access", "std.all"]) + abs(sem_results[sem_results$lhs=="poor_mental_health" & sem_results$rhs=="indigenous_binary", "std.all"])) * 100), 0)`% of Indigenous mental health disparity is mediated by healthcare access barriers, while diabetes shows stronger direct historical trauma pathways.
+The patterns demonstrate divergent causal mechanisms—diabetes reflecting historical trauma pathways while mental health disparities operate through contemporary access barriers.
 
 \newpage
 
