@@ -492,64 +492,51 @@ sem_colors <- list(
 # Use capture.output to completely suppress any output
 invisible(capture.output({
   semPaths(sem_fit,
-           what = "std",
-           whatLabels = "std", 
-           style = "lisrel",
+           what = "std", 
+           whatLabels = "std",
+           style = "lisrel", 
            layout = "tree2",
-           rotation = 1,
-           curvePivot = TRUE,
+           rotation = 1, 
+           curvePivot = TRUE, 
            curve = 1.5,
-           sizeMan = 10,        # Increased from 7
-           sizeLat = 12,        # Increased from 9
-           edge.label.cex = 1.2, # Increased from 0.9 (REMOVED DUPLICATE)
-           label.cex = .9,     # Increased from 0.9
-           nodeLabels = c("Indigenous\nStatus", 
-                         "Diabetes", 
-                         "Regular\nProvider",
-                         "Unmet\nNeeds",
-                         "Mental\nHealth",
-                         "Health Care\nAccess"),
+           sizeMan = 9,        # Slightly smaller for PNG
+           sizeLat = 11,       # Slightly smaller for PNG
+           edge.label.cex = 1.2, 
+           label.cex = .9,
+           nodeLabels = c("Indigenous\nStatus", "Diabetes", "Regular\nProvider",
+                       "Unmet\nNeeds", "Mental\nHealth", "Health Care\nAccess"),
            color = list(
              lat = sem_colors$latent,
-             man = c(
-               sem_colors$indigenous,      # indigenous_binary
-               sem_colors$diabetes,        # has_diabetes  
-               sem_colors$access_indicators, # has_regular_provider
-               sem_colors$access_indicators, # has_unmet_needs
-               sem_colors$mental_health    # poor_mental_health
-             )
+             man = c(sem_colors$indigenous, sem_colors$diabetes,
+                    sem_colors$access_indicators, sem_colors$access_indicators,
+                    sem_colors$mental_health)
            ),
            # FIX FOR FAINT LINES:
            edge.lty = ifelse(sem_fit@Model@GLIST$beta < 0.1, "dashed", "solid"),
            edge.alpha = ifelse(abs(sem_fit@Model@GLIST$beta) < 0.1, 0.9, 1),
            edge.width = ifelse(abs(sem_fit@Model@GLIST$beta) < 0.1, 2.5*gold_rat, 2.5),
-           asize = ifelse(abs(sem_fit@Model@GLIST$beta) < 0.1, 2.5*gold_rat, 2.5),              # Arrow size
-            esize = ifelse(abs(sem_fit@Model@GLIST$beta) < 0.1, 2.5*gold_rat, 2.5),             # Edge label size
-           # CRITICAL FIXES FOR READABILITY:
+           asize = ifelse(abs(sem_fit@Model@GLIST$beta) < 0.1, 2.5*gold_rat, 2.5),          # Arrow size
+            esize = ifelse(abs(sem_fit@Model@GLIST$beta) < 0.1, 2.5*gold_rat, 2.5), 
+           # Other styling:
            shapeMan = "rectangle",
            shapeLat = "ellipse",
            border.width = 1.5,
            border.color = "black",
-           label.color = "white",  # White text on colored backgrounds
-           edge.color = "black",
-           mar = c(12, 5, 6, 5),  # Large bottom margin for legend
-           nCharNodes = 0,
-           intercepts = FALSE,
-           residuals = FALSE,
+           label.color = "white",
+           mar = c(12, 4, 6, 4),  # Large bottom margin for legend
+           nCharNodes = 0, 
+           intercepts = FALSE, 
+           residuals = F,
            thresholds = FALSE,
            fade=F,
            optimizeLatRes = TRUE,
-           # Node styling for better contrast:
            node.width = 2,
            node.height = 1,
            aspect = 2,
-           # Font styling:
-           font = 2,  # Bold font
+           font = 2,
            label.scale = TRUE,
            label.prop = 0.9,
-           # Background and overall theme:
            bg = "white",
-           # Edge styling:
            edge.label.color = "black",
            edge.label.bg = "white")
 }))
