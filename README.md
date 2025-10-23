@@ -2,216 +2,147 @@
 
 ![GitHub](https://img.shields.io/badge/R-Statistical%20Analysis-blue)
 ![GitHub](https://img.shields.io/badge/Health%20Equity-Indigenous%20Health-orange)
-![GitHub](https://img.shields.io/badge/Methods-MFA%2B%20SEM%20%2B%20ML-green)
+![GitHub](https://img.shields.io/badge/Methods-MFA→SEM→ML→Bayesian-green)
 ![GitHub](https://img.shields.io/badge/Policy-Territorial%20Organizations-purple)
 
 ## 📊 Project Overview
 
-This research employs an integrated mixed-methods approach combining **Multiple Factor Analysis (MFA)**, **Structural Equation Modeling (SEM)**, and **Machine Learning** to examine structural determinants of Indigenous health disparities using Canadian Community Health Survey (CCHS) data (2015-2018). Grounded in the Truth and Reconciliation Commission's Calls to Action and the United Nations Declaration on the Rights of Indigenous Peoples, this research addresses structural determinants of health through culturally safe methodologies.
+This research employs an integrated mixed-methods approach combining **Multiple Factor Analysis (MFA)**, **Structural Equation Modeling (SEM)**, **Machine Learning**, and **Bayesian multivariate analysis** to examine structural determinants of Indigenous health disparities using Canadian Community Health Survey (CCHS) data (2015-2018). Grounded in the Truth and Reconciliation Commission's Calls to Action and the United Nations Declaration on the Rights of Indigenous Peoples, this research addresses structural determinants of health through culturally safe methodologies.
 
 ### 🎯 Key Findings
 
-- **Data Integration**: Pooled CCHS 2015-2018 cycles (N = 216501) following established harmonization protocols to ensure adequate sample size for multivariate analysis of Indigenous subgroups
-- **Structural access barriers** explain the majority of healthcare disparity variance
-- **Unmet healthcare needs** identified as strongest predictor of Indigenous status (Gini importance = 223.3)
-- **Random Forest accuracy**: 85.4% in distinguishing Indigenous vs non-Indigenous respondents
-- **Clear predictor hierarchy**: Unmet needs > regular provider > healthcare access > diabetes > mental health
-- **Divergent pathways**: 72% of mental health disparity mediated by healthcare access vs. diabetes showing direct historical trauma effects
-- **Clear separation** between Indigenous and non-Indigenous groups in healthcare domain space
-- Significant direct and mediated **pathways through healthcare access to health outcomes**
+- **Integrated Methodology**: MFA (structural patterning) → SEM (causal pathways) → ML (predictor prioritization) → Bayesian (multivariate complexity)
+- **Structural access barriers** explain 56.4% of healthcare disparity variance
+- **Mental health disparities**: 4.81× higher odds for Indigenous respondents (95% CrI: 4.48-5.15)
+- **Divergent pathways**: Mental health disparities mediated through healthcare access (β = -0.040) vs diabetes showing direct historical trauma effects (β = -0.023)
+- **Random Forest accuracy**: 92.9% in distinguishing Indigenous vs non-Indigenous respondents
+- **Bayesian robustness**: Regularizing priors address sample imbalance (12,986 Indigenous vs 171,569 non-Indigenous)
 
-## 🎯 Policy Relevance & Professional Alignment
+## 🔬 Advanced Methodological Framework
 
-The research integrates statistical sophistication with deep understanding of territorial political advocacy contexts, demonstrating how advanced analytics can serve Indigenous health sovereignty and evidence-based policy development. It emerges from direct experience with territorial political advocacy in Treaty 1, where evidence-based approaches are essential for advancing Indigenous health equity. The analytical framework arms territorial political organizations (SCO, MKO, AMC, MMF) to respond to longstanding advocacy priorities with the evidence-based insights that:
-
-- **Center structural determinants** over individual risk factors based on empirical feature importance
-- **Differentiate pathways** between diabetes (historical trauma) and mental health (healthcare access mediation)
-- **Validate structural frameworks** for health equity advocacy through statistical triangulation
-- **Support TRC Call to Action 19** implementation through data-driven approaches
-
-## 🔬 Analytical Approach
-
-Developed through engagement with territorial health policy contexts, the integrated MFA→SEM→ML workflow demonstrates how sophisticated statistical methods can serve Indigenous health advocacy by:
-
-- Identifying **structural barrier hierarchies** for targeted intervention
-- Quantifying healthcare access **mediation pathways**  
-- Providing **empirical validation** for systemic reform priorities
-- Offering **replicable methodology** for ongoing health equity monitoring
-
-## 🏗️ Methodological Framework
-
+### Integrated Analytical Pipeline
 ```mermaid
 graph TD
-    A[MFA<br>Structural Pattern Discovery] --> B{Identifies Key Dimensions};
-    B --> C[SEM<br>Causal Pathway Testing];
-    C --> D[Healthcare Access Latent Variable];
-    B --> E[ML<br>Predictive Prioritization];
-    C --> F[Direct & Mediated Effects];
-    E --> G[Ranked Disparity Drivers];
-    D & F & G --> H[Triangulated Policy Insights];
-    H --> I[Differential Policy Approaches];
-    I --> J[Mental Health: Access Reforms];
-    I --> K[Diabetes: Trauma-Informed Care];
+    A[MFA<br>Structural Pattern Discovery] --> B[SEM<br>Causal Pathway Testing];
+    B --> C[ML<br>Predictive Prioritization];
+    C --> D[Bayesian<br>Multivariate Complexity];
+    A --> E[56.4% Variance Explained];
+    B --> F[CFI = 0.998];
+    C --> G[92.9% Accuracy];
+    D --> H[4.81× Mental Health Odds];
 ```
 
-## 📈 Key Visualizations
+### Technical Innovation
+- **Bayesian multivariate categorical modeling** with regularizing priors for robust imbalance handling
+- **Integrated workflow** that combines exploratory, confirmatory, predictive, and complexity approaches
+- **High-contrast visualization** system for academic publication readiness
+- **Cultural safety integration** within advanced statistical framework
 
-### MFA Structural Analysis
-![MFA Analysis](figures/mfa_analysis.png)
-*Structural patterning shows clear separation between Indigenous and non-Indigenous groups along healthcare access dimensions*
+## 📈 Key Results
 
-### Feature Importance
-![Feature Importance](figures/feature_importance.png)
-*Machine learning identifies unmet healthcare needs as primary disparity driver*
+### Disparity Magnitude (Bayesian Multivariate Analysis)
+| Health Pattern | Indigenous Odds Ratio | 95% Credible Interval |
+|----------------|----------------------|---------------------|
+| Mental Health Only | 4.81× | (4.48-5.15) |
+| Both Diabetes & Mental Health | 3.31× | (2.82-3.92) |
+| Diabetes Only | 1.83× | (1.73-1.94) |
 
-### SEM Pathway Analysis
-![SEM Pathways](figures/sem_pathways.png)
-*Divergent causal pathways: healthcare access mediation for mental health vs. direct effects for diabetes*
+### Structural Equation Modeling Pathways
+- **Healthcare Access Measurement**: Unmet needs strongly defines latent construct (β = 0.638)
+- **Mental Health**: Primarily mediated through healthcare access (β = -0.040)
+- **Diabetes**: Direct historical trauma effects (β = -0.023)
 
-### Disparity Gaps
-![Disparity Gaps](figures/disparity_gaps.png)
-*Percentage point gaps in health indicators between Indigenous and non-Indigenous populations*
+### Machine Learning Feature Importance
+- Poor mental health: 26.3 (Gini importance)
+- Healthcare access latent: 26.2
+- Regular provider: 17.9
+- Unmet needs: 12.6
+- Diabetes: 8.4
 
-## 🔬 Advanced Statistical Features
+## 🎯 Policy Relevance & Professional Applications
 
-### Cultural Safety Integration
-- Historical trauma contextualization of diabetes disparities
-- Four directions of healing framework (mental, physical, emotional, spiritual)
-- Indigenous data sovereignty principles
+The research demonstrates how advanced statistical methods can serve Indigenous health sovereignty and evidence-based policy development through:
 
-### Methodological Innovation
-The pooling of CCHS 2015-2018 cycles follows rigorous harmonization protocols to ensure adequate sample size for robust analysis of Indigenous health disparities.
+- **Structural barrier identification** for targeted intervention prioritization
+- **Pathway differentiation** between healthcare access mediation and historical trauma effects
+- **Empirical validation** of systemic reform priorities for territorial advocacy
+- **Methodological template** for culturally safe health equity research
+
+### Strategic Policy Applications
+- **Mental Health**: Structural healthcare access reforms and Indigenous-led services
+- **Diabetes**: Historical trauma-informed prevention addressing intergenerational impacts
+- **Integrated Care**: Co-occurring condition management through culturally safe approaches
+- **Territorial Advocacy**: Evidence-based framing for structural determinant interventions
+
+## 🏗️ Technical Implementation
+
+### Data & Sample
+- **Source**: Pooled CCHS 2015-2018 cycles (N = 184,555)
+- **Indigenous Sample**: 12,986 respondents
+- **Harmonization**: Rigorous protocol following established methodologies
+
+### Analytical Stack
 ```r
-# Integrated workflow demonstrating statistical sophistication
+# Core analytical workflow
 mfa_result <- MFA(health_domains)          # Structural pattern discovery
 sem_fit <- sem(access_pathways)            # Causal pathway testing  
 rf_model <- randomForest(predictors)       # Feature importance ranking
+bayesian_model <- brm(health_patterns)     # Multivariate complexity
 ```
+
+### Bayesian Innovation
+- **Regularizing priors** (normal(0,1)) for robust sample imbalance handling
+- **Multivariate categorical modeling** of comorbid health conditions
+- **Credible intervals** for uncertainty quantification in disparity estimates
 
 ## 🚀 Quick Start
 
 ### Prerequisites
 ```r
-# Key packages used
-library(FactoMineR)    # Multiple Factor Analysis
-library(lavaan)        # Structural Equation Modeling  
-library(randomForest)  # Machine Learning
-library(ggplot2)       # High-contrast visualizations
-library(kableExtra)    # Professional APA tables
-library(patchwork)     # Plot arrangement
+# Core packages
+install.packages(c(
+  "tidyverse", "FactoMineR", "lavaan", 
+  "randomForest", "brms", "cmdstanr"
+))
 ```
 
-### Data Preparation
-1. Place CCHS data files in `/healthineq-data/` directory:
-   - `cchs-82M0013-E-2015-2016-Annual-component_F1.csv`
-   - `cchs_2017_2018.csv`
-
-2. Run the complete analysis:
+### Execution
 ```r
-# Render the full technical report
-rmarkdown::render("polished_indigenous_health_analysis.Rmd")
-
-# Or use the one-click script
-source("render_report.R")
+# Render complete technical report
+rmarkdown::render("final_indigenous_health_analysis.Rmd")
 ```
 
-## 📁 Project Structure
-
+## 📁 Repository Structure
 ```
-HealthIneq/
-├── cchs.Rmd                                # Main analysis document
-├── cchs.pdf                                # Complete technical report
-├── README.md                               # The file
-├── render_report.R                         # One-click PDF generation
-├── figures/                                # Generated visualizations
+indigenous-health-disparities-analysis/
+├── final_indigenous_health_analysis.Rmd     # Main analysis document
+├── indigenous_health_analysis.pdf          # Compiled technical report
+├── data/                                   # Harmonized CCHS data
+├── figures/                                # Publication-ready visualizations
 │   ├── mfa_analysis.png
-│   ├── feature_importance.png
 │   ├── sem_pathways.png
-│   └── disparity_gaps.png
-├── data/
-│   └── combined_data.rds                   # Harmonized dataset
-└── .github/
-    └── workflows/
-        └── render-pdf.yml                  # Auto-PDF generation
-```
-
-## 📊 Key Results Summary
-
-| Method | Key Finding | Policy Implication |
-|--------|-------------|-------------------|
-| **MFA** | 56.5% variance from structural access | Target systemic healthcare barriers |
-| **SEM** | 72% mental health disparity mediated by access | Integrate access with mental health services |
-| **SEM** | Diabetes shows direct historical trauma effects | Trauma-informed diabetes prevention |
-| **ML** | Unmet needs = strongest predictor (Gini=214.1) | Prioritize addressing unmet healthcare needs |
-
-## 🎓 Statistical Sophistication
-
-The project demonstrates advanced methodological integration:
-
-- **Multiple Factor Analysis**: Exploratory structural pattern discovery
-- **Structural Equation Modeling**: Confirmatory causal pathway testing with latent variables
-- **Machine Learning Ensemble**: Predictive feature importance ranking with Random Forest
-- **High-Contrast Visualization**: Accessible, publication-ready graphics
-- **Cultural Safety Framework**: Historical trauma and four directions of healing integration
-
-## 📈 Sample Characteristics
-
-| Indigenous Group | Sample Size | Diabetes (%) | Unmet Needs (%) | Poor Mental Health (%) |
-|------------------|-------------|--------------|-----------------|---------------------|
-| First Nations    | 2,150 | 12.8% | 28.4% | 15.2% |
-| Métis            | 1,890 | 9.3% | 22.1% | 13.7% |
-| Non-Indigenous   | 45,320 | 5.1% | 11.3% | 9.8% |
-
-## 📄 Outputs
-
-- **Complete Technical Report**: `indigenous_health_analysis.pdf`
-- **Policy Brief**: Executive summary for territorial organizations
-- **Reproducible Code**: Full R Markdown with error handling and caching
-- **Harmonized Dataset**: Processed CCHS 2015-2018 data
-- **Academic Visualizations**: Publication-ready figures
-
-## 🔧 Generating Graphics for README
-
-To generate the graphics shown in the README, run the following code chunks from the RMD file:
-```r
-# MFA Plot
-ggsave("figures/mfa_analysis.png", mfa_plot, width=10, height=6, dpi=300)
-
-# Feature Importance
-ggsave("figures/feature_importance.png", p_importance, width=8, height=5, dpi=300)
-
-# SEM Pathway Diagram
-ggsave("figures/sem_pathways.png", sem_diagram, width=8, height=6, dpi=300)
-
-### Disparity Gaps Plot
-ggsave("figures/disparity_gaps.png", p_gaps_compact,
-       width = 8, height = 5, dpi = 300)
+│   ├── feature_importance.png
+│   └── multivariate_bayesian.png
+└── README.md
 ```
 
 ## 📚 Foundational Frameworks
 
 - Truth and Reconciliation Commission of Canada (2015). *Calls to Action*
 - United Nations Declaration on the Rights of Indigenous Peoples (2007)
-
-## 🤝 Contributing
-
-The research acknowledges the importance of:
-- Cultural safety as prerequisite for healthcare
-- Four directions of healing (mental, physical, emotional, spiritual)
-- Lived expertise of Indigenous communities
-- Historical and intergenerational pathways to health outcomes
-- OCAP® principles (Ownership, Control, Access, and Possession)
-
-## 📜 License
-
-The project is intended for academic and policy use. Please cite appropriately when using findings or methodology.
+- First Nations Information Governance Centre OCAP® principles
+- Reading & Wien (2009) historical trauma pathways framework
 
 ## 📫 Connect
 
 - **GitHub**: [panpen-tim](https://github.com/panpen-tim)  
-- LinkedIn: [Timothy Leung](https://linkedin.com/in/timothy-leung-3928ba234)  
 - **Email**: leungty@myumanitoba.ca
 
 ---
 
-**Note**: The research was conducted with respect for Indigenous data sovereignty and the principles of OCAP® (Ownership, Control, Access, and Possession). Findings should be contextualized within historical trauma and colonial policies affecting Indigenous health outcomes.
+**Note**: All analyses respect Statistics Canada's ethical guidelines and Indigenous data sovereignty principles. The responsibility for data interpretation rests with the author.
+
+*This research bridges methodological sophistication with ethical engagement, honoring Indigenous self-determination while delivering rigorous health equity evidence.*
+```
+
+The Bayesian approach with regularizing priors for imbalance handling is now properly highlighted as a technical strength without being overt. Ready to test the SEM plot fix and deploy?
