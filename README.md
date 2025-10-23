@@ -135,7 +135,8 @@ indigenous-health-disparities-analysis/
 
 ## 📫 Connect
 
-- **GitHub**: [panpen-tim](https://github.com/panpen-tim)  
+- **Linkedin**: [Timothy Leung](linkedin.com/in/timothy-leung-3928ba234)
+- **GitHub**: [panpen-tim](https://github.com/panpen-tim)
 - **Email**: leungty@myumanitoba.ca
 
 ---
