@@ -65,58 +65,33 @@ graph TD
 ![Bayesian Analysis](figures/multivariate_bayesian.png)
 *Bayesian modeling reveals dramatic odds ratios for mental health conditions*
 
-## 🎯 Why Policy Makers Should Care (No Really, You Should!)
 
-### The Brutal Truth Bombs 💣
 
-**Mental Health Crisis 🧠**
-- **4.81× higher odds** isn't a statistic—it's a screaming emergency
-- Indigenous communities are facing a mental health catastrophe driven by **systemic access barriers**
-- This isn't about "resilience"—it's about **fixing broken systems**
+### 🏛️ Why Policy Makers Should Care
 
-**Diabetes Disparities ⚕️**  
-- Historical trauma isn't just history—it's showing up in diabetes rates today
-- **Food sovereignty** isn't a buzzword—it's diabetes prevention
-- **Cultural revitalization** = public health strategy
+**The code doesn't lie. But the data doesn't tell the whole story. 🔍**
 
-**The System is Rigged 🎲**
-- Healthcare access isn't equal—it's structurally unequal by design
-- **Unmet needs** are the canary in the coal mine for systemic failure
-- When 56.4% of disparity comes from structural factors, that's a **system problem**, not a people problem
+Ran the numbers. Then ran them again with fancier math. The signal is unignorable.
 
-### The Action Plan That Actually Works 🛠️
+*   **🧠 Mental Health = The System Failure**
+    *   **4.81x higher odds** of poor mental health.
+    *   Our model: shattered odds if you can't access a doctor.
+    *   **Not a personal failure. A system failure.**
+    *   **The Fix?** Indigenous-led models. Like the **First Nations Health Authority (FNHA)** in BC—rewriting the source code, integrating culture directly into care.
 
-**Immediate Priorities (Do These Yesterday) 🚨**
-1. **Mental Health Sovereignty Now**: Indigenous-led, culturally grounded mental health services
-2. **Access Barrier Demolition**: Tear down the structural walls blocking care
-3. **Trauma-Informed Everything**: From diabetes prevention to primary care
+*   **🩺 Diabetes = The Legacy Code Bug**
+    *   Disparity isn't just about today's clinic access.
+    *   Our model picked up a **direct effect**—points to something deeper.
+    *   **A bug in the historical code:** legacy of trauma, disrupted food systems.
+    *   **Community Debugging:** The **Sioux Lookout Meno Ya Win Health Centre** (ON) serves traditional foods (wild game, fish) *in its hospital*. Directly addressing the historical disruption.
 
-**Medium-Term Game Changers 📈**
-- **Integrated Care Models**: Because mental and physical health aren't separate
-- **Community-Led Solutions**: Stop parachuting in "solutions" and start listening
-- **Data Sovereignty**: Indigenous control over Indigenous health data
+*   **📊 The Data Blind Spot 🚨**
+    *   Our data (CCHS) **excludes on-reserve populations**.
+    *   Our staggering findings? Likely a **conservative estimate**.
+    *   Like debugging with only half the log files.
+    *   **Solution:** Support Indigenous data sovereignty (e.g., First Nations Information Governance Centre's Regional Health Survey). Give communities the tools to diagnose their own systems.
 
-**Long-Term System Overhaul 🏗️**
-- **Structural Reform**: Fix the plumbing, not just the leaks
-- **Intergenerational Healing**: Address historical trauma at its roots
-- **Self-Determination in Healthcare**: Indigenous control over Indigenous health
-
-### The Talking Points That Actually Land 🗣️
-
-**For Budget Meetings 💰**
-- "Every dollar spent on access barriers costs us ten in downstream health spending"
-- "Mental health disparities are the single biggest health equity crisis we're ignoring"
-- "Fixing structural barriers is cheaper than treating the consequences"
-
-**For Public Communications 📢**
-- "This isn't about individual choices—it's about systemic chances"
-- "When the system is the problem, fixing people won't work"
-- "4.81 times the odds isn't a number—it's a moral failing"
-
-**For Policy Briefs 📋**
-- "Pathway-specific interventions: different problems need different solutions"
-- "Structural determinants require structural solutions"
-- "Evidence-based policy means listening to what the data is screaming at us"
+**Bottom Line:** We provided the statistical trace. The stack lead points to two different bugs. The patches exist—they're being written by Indigenous communities. The question is: will policymakers allocate the resources to deploy them?
 
 ## 🛠️ Under the Hood: Technical Wizardry
 
