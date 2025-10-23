@@ -18,15 +18,16 @@ output:
   pdf_document:
     latex_engine: xelatex
     toc: true
-    toc_depth: 4
+    toc_depth: 3
     number_sections: true
     fig_caption: true
 ---
 
 ```{r setup, include=FALSE}
+gold_rat=2/(1+sqrt(5))
 knitr::opts_chunk$set(
-  echo=FALSE, warning=FALSE, message=FALSE, cache=TRUE, dpi=300,
-  fig.width = 6.5, fig.height = 4.5,
+  echo=F, warning=F, message=F, cache=T, dpi=300,
+  fig.width = 8, fig.height = 8*gold_rat,
   dev= "png"
 )
 ```
@@ -34,18 +35,18 @@ knitr::opts_chunk$set(
 ```{r loadr,cache=F}
 # Check and install packages from CRAN and GitHub
 if(!require("devtools", quietly=T)) install.packages("devtools")
+if(!require("cmdstanr", quietly=T))install.packages("cmdstanr", repos = c("https://mc-stan.org/r-packages/", getOption("repos")))
 
 r_pack = c(
   "tidyverse", "FactoMineR", "factoextra", "dplyr", "lavaan", "stringr",
   "cchsflow", "haven", "randomForest", "SHAPforxgboost", "ggforce",
   "ggplot2", "viridis", "RColorBrewer", "kableExtra", "ggpubr",
-  "corrplot", "GGally", "patchwork", "scales", "xgboost", "ggridges", "pROC","semPlot"
+  "corrplot", "GGally", "patchwork", "scales", "xgboost", "ggridges", "pROC","semPlot","rstanarm","brms"
 )
 new_r = r_pack[!(r_pack %in% installed.packages()[,"Package"])]
 if(length(new_r)) install.packages(new_r)
 for(pac in r_pack) library(pac, character.only=T)
 ```
-
 
 ```{r theme_gen, include=FALSE}
 #' High-Contrast Complementary Color Theme for Academic Publishing
@@ -92,6 +93,7 @@ get_contrast_palette <- function(n) {
 
 theme_set(create_high_contrast_theme())
 ```
+
 ```{r globals}
 # Data loading and harmonization pipeline
 regenerate_combined_data <- function() {
@@ -116,16 +118,12 @@ regenerate_combined_data <- function() {
     df <- df %>%
       mutate(
         indigenous_status = case_when(
-          indigenous == 1 ~ "First Nations",
-          indigenous == 2 ~ "Métis", 
-          indigenous == 3 ~ "Inuit",
-          indigenous == 4 ~ "Multiple Indigenous",
-          indigenous == 5 ~ "Indigenous, nfd",
-          indigenous == 6 ~ "Non-Indigenous",
+          indigenous == 1 ~ "Indigenous",      # Yes = Indigenous (combined)
+          indigenous == 2 ~ "Non-Indigenous",  # No = Non-Indigenous
           TRUE ~ NA_character_
         ),
-        indigenous_binary = ifelse(indigenous %in% c(1,2,3,4,5), 1, 
-                                  ifelse(indigenous == 6, 0, NA)),
+        indigenous_binary = ifelse(indigenous == 1, 1, 
+                                  ifelse(indigenous == 2, 0, NA)),
         has_regular_provider = ifelse(regular_provider == 1, 1, 0),
         has_unmet_needs = ifelse(unmet_needs == 1, 1, 0),
         has_diabetes = ifelse(diabetes == 1, 1, 0),
@@ -152,12 +150,12 @@ load_harmonized_data <- function(file_path = "C:/healthineq-data/combined_data.r
 
 combined_data <- load_harmonized_data()
 
-# Create analysis-ready dataset
+# Create analysis-ready dataset with binary Indigenous grouping
 analysis_data <- combined_data %>%
   filter(!is.na(indigenous_binary)) %>%
   mutate(
     indigenous_group = factor(indigenous_status, 
-                             levels = c("Non-Indigenous", "First Nations", "Métis", "Inuit")),
+                             levels = c("Non-Indigenous", "Indigenous")),
     healthcare_access_latent = case_when(
       has_regular_provider == 1 & has_unmet_needs == 0 ~ 3,
       has_regular_provider == 1 & has_unmet_needs == 1 ~ 2,
@@ -169,7 +167,7 @@ analysis_data <- combined_data %>%
   filter(complete.cases(has_diabetes, has_regular_provider, has_unmet_needs, poor_mental_health))
 ```
 
-```{r mfa-analysis, echo=FALSE}
+```{r mfa-analysis }
 mfa_data <- analysis_data %>%
   select(has_diabetes, has_regular_provider, has_unmet_needs, poor_mental_health, healthcare_access_latent) %>%
   mutate(across(everything(), as.numeric)) %>%
@@ -178,14 +176,14 @@ mfa_data <- analysis_data %>%
 mfa_result <- MFA(mfa_data, 
                   group = c(1, 1, 1, 1, 1),
                   type = c("s", "s", "s", "s", "s"),
-                  ncp = 3,
+                  ncp = 2,
                   graph = FALSE,
                   name.group = c("Diabetes", "Provider", "Unmet_Needs", "Mental_Health", "Access_Latent"))
 
 variance_explained <- mfa_result$eig[,2] %>% head(3)
 ```
 
-```{r sem-analysis, echo=FALSE}
+```{r sem-analysis}
 sem_model <- '
   healthcare_access =~ has_regular_provider + has_unmet_needs
   has_diabetes ~ indigenous_binary
@@ -202,7 +200,7 @@ significant_paths <- sem_results %>%
   arrange(pvalue)
 ```
 
-```{r ml-analysis, echo=FALSE, fig.cap="Machine Learning Feature Importance for Indigenous Status Prediction", out.width="90%"}
+```{r ml-analysis , fig.cap="Machine Learning Feature Importance for Indigenous Status Prediction", out.width="90%"}
 ml_data <- analysis_data %>%
   select(indigenous_binary, has_diabetes, has_regular_provider, 
          has_unmet_needs, poor_mental_health, healthcare_access_latent) %>%
@@ -231,25 +229,106 @@ importance_df <- as.data.frame(rf_model$importance) %>%
 rf_accuracy <- round(mean(predict(rf_model, test_data) == test_data$indigenous_binary), 3)*100
 ```
 
+```{r bayesian-mult, include=F}
+# Check if model already exists to avoid re-running
+model_path <- "C:/healthineq-data/bayesian_multivar_model.rds"
+
+if (!file.exists(model_path)) {
+  # Calculate actual rates dynamically
+  rate_summary <- analysis_data %>%
+    group_by(indigenous_group) %>%
+    summarise(
+      diabetes_rate = round(mean(has_diabetes) * 100, 1),
+      unmet_rate = round(mean(has_unmet_needs) * 100, 1),
+      no_provider_rate = round(mean(has_regular_provider == 0) * 100, 1),
+      mental_rate = round(mean(poor_mental_health) * 100, 1),
+      n = n()
+    )
+
+  # Create combined health outcome variable
+  analysis_data_multivar <- analysis_data %>%
+    mutate(
+      health_pattern = case_when(
+        has_diabetes == 1 & poor_mental_health == 1 ~ "Diabetes_MentalHealth",
+        has_diabetes == 1 & poor_mental_health == 0 ~ "Diabetes_Only", 
+        has_diabetes == 0 & poor_mental_health == 1 ~ "MentalHealth_Only",
+        has_diabetes == 0 & poor_mental_health == 0 ~ "Neither"
+      ),
+      health_pattern = factor(health_pattern, 
+                             levels = c("Neither", "Diabetes_Only", "MentalHealth_Only", "Diabetes_MentalHealth"))
+    )
+
+  # Use faster, simpler model for knitting
+  multivar_priors <- c(
+    prior(normal(0, 1), class = "b", dpar = "muDiabetesOnly"),
+    prior(normal(0, 1), class = "b", dpar = "muMentalHealthOnly"), 
+    prior(normal(0, 1), class = "b", dpar = "muDiabetesMentalHealth")
+  )
+
+  multivar_model <- brm(
+    health_pattern ~ indigenous_binary,
+    data = analysis_data_multivar,
+    family = categorical(refcat = "Neither"),
+    prior = multivar_priors,
+    chains = 2, iter = 1000, seed = 123,  # Reduced for faster knitting
+    backend = "cmdstanr"
+  )
+  
+  saveRDS(multivar_model, model_path)
+} else {
+  multivar_model <- readRDS(model_path)
+}
+```
+
+```{r bayesian-summary}
+# Extract results from the successfully fitted model
+multivar_results <- hypothesis(multivar_model, 
+  c("exp(muDiabetesOnly_indigenous_binary) = 0",
+    "exp(muMentalHealthOnly_indigenous_binary) = 0", 
+    "exp(muDiabetesMentalHealth_indigenous_binary) = 0"))
+
+# Create multivariate results table
+multivar_summary <- data.frame(
+  Health_Pattern = c("Diabetes Only", "Mental Health Only", "Both Diabetes & Mental Health"),
+  Indigenous_Count = c(
+    sum(analysis_data_multivar$health_pattern == "Diabetes_Only" & analysis_data_multivar$indigenous_binary == 1),
+    sum(analysis_data_multivar$health_pattern == "MentalHealth_Only" & analysis_data_multivar$indigenous_binary == 1),
+    sum(analysis_data_multivar$health_pattern == "Diabetes_MentalHealth" & analysis_data_multivar$indigenous_binary == 1)
+  ),
+  Non_Indigenous_Count = c(
+    sum(analysis_data_multivar$health_pattern == "Diabetes_Only" & analysis_data_multivar$indigenous_binary == 0),
+    sum(analysis_data_multivar$health_pattern == "MentalHealth_Only" & analysis_data_multivar$indigenous_binary == 0), 
+    sum(analysis_data_multivar$health_pattern == "Diabetes_MentalHealth" & analysis_data_multivar$indigenous_binary == 0)
+  ),
+  Posterior_OR = round(exp(multivar_results$hypothesis$Estimate), 2),
+  CI_95 = paste0("(", 
+    round(exp(multivar_results$hypothesis$CI.Lower), 2), "-",
+    round(exp(multivar_results$hypothesis$CI.Upper), 2), ")")
+)
+```
+
+
 \newpage
 
 # Abstract
 
-**Background**: Indigenous health disparities in Canada represent complex, structurally-mediated inequities rooted in historical trauma and colonial policies. **Methods**: Using pooled Canadian Community Health Survey (CCHS) data from 2015-2018 (N = `r nrow(analysis_data)`), this study employed an integrated mixed-methods approach combining Multiple Factor Analysis (MFA), Structural Equation Modeling (SEM), and machine learning (Random Forest) to examine healthcare access pathways and their relationship to health outcomes within a cultural safety framework. **Results**: MFA revealed that `r round(mfa_result$eig[1,2], 1)`% of healthcare disparity variance was explained by structural access dimensions, with clear separation between Indigenous and non-Indigenous groups. SEM demonstrated excellent fit (CFI = `r round(fitMeasures(sem_fit)["cfi"], 3)`), indicating significant direct effects of Indigenous status on diabetes ($\beta$ = `r round(sem_results[sem_results$lhs=="has_diabetes" & sem_results$rhs=="indigenous_binary", "std.all"], 3)`, p < .001) and primarily mediated effects through healthcare access on mental health. Machine learning identified unmet healthcare needs as the strongest predictor of Indigenous status (Gini importance = `r round(importance_df$MeanDecreaseGini[1], 1)`), with 85.4% classification accuracy. **Conclusion**: Structural healthcare access barriers, particularly unmet needs, are the primary drivers of Indigenous health disparities in Canada, with divergent pathways requiring diabetes-focused historical trauma interventions and mental health-focused access reforms through culturally safe healthcare grounded in Indigenous self-determination.
+**Background**: Indigenous health disparities in Canada represent complex, structurally-mediated inequities rooted in historical trauma and colonial policies that manifest through distinct healthcare access pathways (Reading & Wien, 2009). **Methods**: Using pooled Canadian Community Health Survey (CCHS) data from 2015-2018 (N = `r nrow(analysis_data)`), this study employed an integrated mixed-methods approach combining Multiple Factor Analysis (MFA), Structural Equation Modeling (SEM), machine learning, and Bayesian multivariate analysis to examine healthcare access as a mediating construct within a cultural safety framework (Hogg et al., 2024). **Results**: MFA revealed `r round(mfa_result$eig[1,2], 1)`% of healthcare disparity variance explained by structural access dimensions. SEM demonstrated excellent fit (CFI = `r round(fitMeasures(sem_fit)["cfi"], 3)`) with significant direct effects of Indigenous status on diabetes ($\beta$ = `r round(sem_results[sem_results$lhs=="has_diabetes" & sem_results$rhs=="indigenous_binary", "std.all"], 3)`, p < .001) and mediated mental health effects. Bayesian analysis identified Indigenous respondents had `r multivar_summary[2,4]`× higher odds of mental health issues only (95% CrI: `r gsub("\\(","",multivar_summary[2,5])` and `r multivar_summary[3,4]`× higher odds of comorbid conditions (95% CrI: `r gsub("\\(","",multivar_summary[3,5])`). **Conclusion**: Structural healthcare access barriers drive Indigenous health disparities through differentiated pathways requiring trauma-informed diabetes interventions and systemic mental health access reforms grounded in Indigenous self-determination (Truth and Reconciliation Commission, 2015).
 
 \newpage
 
 # Introduction
 
-Indigenous health inequities in Canada persist as manifestations of historical trauma and colonial policies that continue to shape contemporary health outcomes (Truth and Reconciliation Commission, 2015). These disparities reflect complex, structurally-mediated pathways rooted in colonial policies, socioeconomic marginalization, and systemic barriers to healthcare access that operate across mental, physical, emotional, and spiritual dimensions of health (Hogg et al., 2024). The over-representation of diabetes among Indigenous populations must be understood within the historical context of inter-generational food insecurity and disrupted relationships with traditional food systems (UWO Commentary, 2024).
+Indigenous health inequities in Canada persist as manifestations of historical trauma and colonial policies that continue to shape contemporary health outcomes (Truth and Reconciliation Commission, 2015). These disparities reflect complex, structurally-mediated pathways rooted in colonial policies, socioeconomic marginalization, and systemic barriers to health care access that operate across mental, physical, emotional, and spiritual dimensions of health (Hogg et al., 2024). The over-representation of diabetes among Indigenous populations must be understood within the historical context of inter-generational food insecurity and disrupted relationships with traditional food systems (UWO Commentary, 2024).  
 
-In Manitoba, the Truth and Reconciliation Commission's Calls to Action 18-24 (2015), which specifically address health disparities, and the United Nations Declaration on the Rights of Indigenous Peoples (UNDRIP, United Nation, 2007) establish the ethical and political imperative for research that addresses structural determinants of Indigenous health. Territorial political advocacy organizations have consistently advanced research sovereignty and methodologies that center Indigenous ways of knowing. Drawing from professional experience in Indigenous health policy analysis, this research responds to these frameworks by employing methodological approaches that respect nation-specific frameworks and honor distinct cultural conceptions of health and wellbeing.
+These structural determinants operate through what Reading and Wien (2009) term "historical trauma pathways," where colonial policies become biologically embedded through stress physiology and intergenerational transmission. The current analysis extends this framework by examining how these pathways differentially manifest in physical versus mental health outcomes through contemporary healthcare system barriers.  
 
-Recent scholarship has critiqued Western research paradigms that fail to acknowledge Indigenous epistemologies or address power imbalances in knowledge production (Flicker et al., 2024). This study responds to these critiques by employing methodological approaches that acknowledge the limitations of survey data in capturing holistic Indigenous health conceptions while maximizing the analytical value of available data through advanced statistical integration.
+In Manitoba, the Truth and Reconciliation Commission's Calls to Action 18-24 (2015), which specifically address health disparities, and the United Nations Declaration on the Rights of Indigenous Peoples (UNDRIP, United Nation, 2007) establish the ethical and political imperative for research that addresses structural determinants of Indigenous health. Territorial political advocacy organizations have consistently advanced research sovereignty and methodologies that center Indigenous ways of knowing. Drawing from professional experience in Indigenous health policy analysis, this research responds to these frameworks by employing methodological approaches that respect nation-specific frameworks and honor distinct cultural conceptions of health and wellbeing.  
 
-Previous research on Indigenous health disparities has often examined individual health outcomes in isolation or used single-method approaches that fail to capture the multidimensional nature of these inequities. This study addresses three critical gaps: *(1)* the need for structural analysis of healthcare access as a multidimensional construct using MFA; *(2)* examination of moderated mediation pathways through which Indigenous status affects health outcomes using SEM; and *(3)* machine learning approaches to identify the most impactful disparity drivers for targeted intervention within a cultural safety framework.
+Recent scholarship has critiqued Western research paradigms that fail to acknowledge Indigenous epistemologies or address power imbalances in knowledge production (Flicker et al., 2024). This study responds to these critiques by employing methodological approaches that acknowledge the limitations of survey data in capturing holistic Indigenous health conceptions while maximizing the analytical value of available data through advanced statistical integration.  
 
-The integrated methodological framework combines MFA for structural pattern discovery, SEM for pathway testing, and ensemble machine learning for predictor importance ranking. This triangulated approach provides both confirmatory and exploratory insights while demonstrating statistical sophistication appropriate for PhD-level research in health statistics, all while acknowledging the fundamental importance of cultural safety as a prerequisite for effective health interventions (Hogg et al., 2024).
+Previous research on Indigenous health disparities has often examined individual health outcomes in isolation or used single-method approaches that fail to capture the multidimensional nature of these inequities. This study addresses three critical gaps: *(1)* the need for structural analysis of health care access as a multidimensional construct using MFA; *(2)* examination of moderated mediation pathways through which Indigenous status affects health outcomes using SEM; and *(3)* machine learning approaches to identify the most impactful disparity drivers for targeted intervention within a cultural safety framework.  
+
+The integrated methodological framework combines MFA for structural pattern discovery, SEM for pathway testing, and ensemble machine learning for predictor importance ranking. This triangulated approach provides both confirmatory and exploratory insights while demonstrating statistical sophistication appropriate for PhD-level research in health statistics, all while acknowledging the fundamental importance of cultural safety as a prerequisite for effective health interventions (Hogg et al., 2024).  
 
 \newpage
 
@@ -257,7 +336,10 @@ The integrated methodological framework combines MFA for structural pattern disc
 
 ## Data Source and Sample
 
-The analysis used pooled Canadian Community Health Survey (CCHS) data from 2015-2016 (Statistics Canada, 2018) and 2017-2018 (Statistics Canada, 2020) cycles. The CCHS employs a complex multi-stage sampling design to provide nationally representative health data for the Canadian population aged 12 and older. All analyses respect Statistics Canada's ethical guidelines for disclosure control and data reliability (Statistics Canada, 2023). The analytical sample included `r nrow(analysis_data)` complete cases after harmonization and missing data exclusion, comprising `r table(analysis_data$indigenous_group)["First Nations"]` First Nations, `r table(analysis_data$indigenous_group)["Métis"]` Métis, and `r table(analysis_data$indigenous_group)["Inuit"]` Inuit respondents, with `r table(analysis_data$indigenous_group)["Non-Indigenous"]` non-Indigenous comparisons.
+The analysis used pooled Canadian Community Health Survey (CCHS) data from 2015-2016 (Statistics Canada, 2018) and 2017-2018 (Statistics Canada, 2020) cycles. The CCHS employs a complex multi-stage sampling design to provide nationally representative health data for the Canadian population aged 12 and older. All analyses respect Statistics Canada's ethical guidelines for disclosure control and data reliability (Statistics Canada, 2023). The analytical sample included `r nrow(analysis_data)` complete cases after harmonization and missing data exclusion, comprising `r table(analysis_data$indigenous_group)["Indigenous"]` Indigenous and `r table(analysis_data$indigenous_group)["Non-Indigenous"]` non-Indigenous respondents.  
+
+\vspace{0.5em}
+\noindent\textbf{Note:} All analyses are based on Statistics Canada data and the responsibility for the use and interpretation of these data is entirely that of the author.
 
 ## Data Harmonization and Cross-Sectional Design Justification
 
@@ -265,21 +347,21 @@ The 2015-2016 and 2017-2018 CCHS cycles were harmonized and pooled as a cross-se
 
 1. **Sample Size and Dimensionality Requirements**: Pooling cycles (N = `r nrow(analysis_data)`) addresses critical sample size requirements for multivariate methods. For Multiple Factor Analysis with 5 observed variables and Structural Equation Modeling testing complex pathways, established methodological guidelines recommend minimum samples of 100-200 cases for stable parameter estimation (Kline, 2015; Wolf et al., 2013). Our pooled sample provides robust statistical power for detecting the small-to-medium effect sizes characteristic of health disparities research.
 
-2. **Indigenous Subgroup Analysis**: Individual CCHS cycles contain insufficient cases for robust Indigenous subgroup analyses (First Nations, Métis, Inuit). Pooling addresses this sampling limitation while maintaining methodological coherence, following precedents in Indigenous health research (Smylie & Firestone, 2016).
+2. **Cross-Sectional Design of CCHS**: The public use microdata files lack person-level identifiers necessary for longitudinal linkage across cycles. The survey design treats each cycle as an independent cross-sectional sample, making pooled cross-sectional analysis the methodologically appropriate approach for maximizing contemporary data utility.
 
-3. **Cross-Sectional Design of CCHS**: The public use microdata files lack person-level identifiers necessary for longitudinal linkage across cycles. The survey design treats each cycle as an independent cross-sectional sample, making pooled cross-sectional analysis the methodologically appropriate approach for maximizing contemporary data utility.
+3. **Policy Relevance and Contemporary Evidence**: Territorial organizations require current, population-level estimates of structural barriers for advocacy and program planning. Pooling the most recent available cycles provides the largest possible sample for identifying current disparity patterns, balancing methodological rigor with practical policy needs.
 
-4. **Policy Relevance and Contemporary Evidence**: Territorial organizations require current, population-level estimates of structural barriers for advocacy and program planning. Pooling the most recent available cycles provides the largest possible sample for identifying current disparity patterns, balancing methodological rigor with practical policy needs.
+4. **Analytical Coherence**: The binary Indigenous identity variable (Indigenous vs Non-Indigenous) is consistently measured across both cycles, ensuring methodological coherence in group comparisons.
 
 This approach follows established methodologies for analyzing health disparities using pooled CCHS cycles (Thomas & Wannell, 2009) and aligns with sample size recommendations for complex multivariate modeling in health research.
 
 ## Measures
 
-**Indigenous Status**: Based on SDC_015, categorized as First Nations, Métis, Inuit, with Non-Indigenous as reference, respecting the constitutional recognition of distinct Indigenous peoples.
+**Indigenous Status**: Based on SDC_015, categorized as *(1)* Indigenous and *(2)* Non-Indigenous, reflecting the binary measurement available in the CCHS public use microdata files.
 
-**Healthcare Access Construct**:
-- Regular healthcare provider (ADL_015; binary)
-- Unmet healthcare needs (ADL_025; binary) 
+**Health Care Access Construct**:
+- Regular health care provider (ADL_015; binary)
+- Unmet health care needs (ADL_025; binary) 
 - Latent composite score (0-3 scale) combining both dimensions
 
 **Health Outcomes**:
@@ -292,13 +374,15 @@ The study implemented an integrated mixed-methods approach with three complement
 
 **Multiple Factor Analysis (MFA)**: Examined the underlying structure of five health domain variables, treating Indigenous status as a supplementary variable to map group disparities in multivariate space (Husson et al., 2010). The approach acknowledges the multidimensional nature of health disparities while maintaining methodological rigor.
 
-**Structural Equation Modeling (SEM)**: Tested healthcare access as a latent mediator between Indigenous status and health outcomes, using maximum likelihood estimation with missing data handling (Kline, 2015). The model specification incorporated insights from historical trauma literature regarding diabetes pathways.
+**Structural Equation Modeling (SEM)**: Tested health care access as a latent mediator between Indigenous status and health outcomes, using maximum likelihood estimation with missing data handling (Kline, 2015). The model specification incorporated insights from historical trauma literature regarding diabetes pathways.
 
 **Machine Learning Ensemble**: Random Forest provided complementary feature importance rankings for predicting Indigenous status, with 70/30 train-test split and cross-validation, highlighting the strongest disparity drivers (Breiman, 2001). The approach prioritizes actionable intervention targets for policy makers.
 
+**Bayesian Multivariate Analysis**: I employed a Bayesian multivariate categorical model with regularizing priors (normal(0,1)) to examine the joint distribution of diabetes and mental health conditions. The model estimated the odds of Indigenous respondents falling into one of four health patterns (diabetes only, mental health only, both conditions, or neither) relative to non-Indigenous respondents, using "neither condition" as the reference category. Regularizing priors help address sample size imbalances and improve model stability, with posterior odds ratios computed using 95% credible intervals.
+
 ## Integrated Workflow Narrative
 
-The MFA→SEM→ML workflow represents a methodological innovation in health disparities research. MFA identified structural patterns in healthcare access disparities, SEM tested specific mediation pathways suggested by the MFA results, and machine learning quantified the relative importance of different disparity drivers. The sequential approach ensures that exploratory findings inform confirmatory testing, while predictive modeling identifies practical intervention targets.
+The MFA→SEM→ML workflow represents a methodological innovation in health disparities research. MFA identified structural patterns in health care access disparities, SEM tested specific mediation pathways suggested by the MFA results, and machine learning quantified the relative importance of different disparity drivers. The sequential approach ensures that exploratory findings inform confirmatory testing, while predictive modeling identifies practical intervention targets.
 
 ## Statistical Software
 
@@ -310,7 +394,7 @@ All analyses were conducted in R version 4.5.1, using the FactoMineR, lavaan, ra
 
 ## Sample Characteristics
 
-```{r sample-table, echo=FALSE}
+```{r sample-table}
 sample_table <- analysis_data %>%
   group_by(indigenous_group) %>%
   summarise(
@@ -326,37 +410,37 @@ kable(sample_table, caption = "Sample Characteristics and Health Indicator Preva
   kable_styling(bootstrap_options = c("striped", "hover"), full_width = FALSE)
 ```
 
-*Table 1*. Health disparities are evident across all domains, with diabetes prevalence notably higher among Indigenous groups, contextualized within historical and intergenerational food insecurity pathways.
+*Table 1*. Health disparities are evident across all domains, with diabetes prevalence notably higher among Indigenous respondents, contextualized within historical and intergenerational food insecurity pathways.
 
 ## Multiple Factor Analysis: Structural Patterning of Health Disparities
-```{r mfa-plot, fig.cap="Multiple Factor Analysis: Structural Patterning of Healthcare Access Disparities", fig.width=6, fig.height=3}
+```{r mfa-plot, fig.cap="Multiple Factor Analysis: Structural Patterning of Health Care Access Disparities"}
 indigenous_groups <- analysis_data[rownames(mfa_data), "indigenous_group"]
 
 p1 <- fviz_mfa_var(mfa_result, "group", 
                    col.var = "contrib",
                    gradient.cols = get_contrast_gradient(),
                    repel = TRUE,
-                   title = "A) MFA - Healthcare Domain Contributions")
+                   title = "A) MFA - Health Care Domain Contributions")
 
 p2 <- fviz_mfa_ind(mfa_result, 
                    habillage = indigenous_groups,
-                   palette = get_contrast_palette(4),  # Need 4 colors for 4 groups
+                   palette = get_contrast_palette(2),
                    addEllipses = TRUE, ellipse.level = 0.95,
                    title = "B) MFA - Distribution by Indigenous Group",
                    legend.title = "Indigenous Group")
 
 mfa_plot <- ggarrange(p1, p2, ncol = 2, widths = c(1, 1.2))
 print(mfa_plot)
-ggsave("figures/mfa_analysis.png", mfa_plot, width=10, height=6, dpi=300)
+ggsave("figures/mfa_analysis.png", mfa_plot, width=10, height=10*gold_rat, dpi=300)
 ```
 
-```{r mfa-variance, echo=FALSE}
+```{r mfa-variance }
 mfa_variance_table <- data.frame(
   Dimension = 1:3,
   `Variance Explained` = paste0(round(variance_explained, 1), "%"),
   `Cumulative Variance` = paste0(round(cumsum(variance_explained), 1), "%"),
   Interpretation = c(
-    "Structural Healthcare Access Dimension",
+    "Structural Health Care Access Dimension",
     "Health Outcomes Dimension", 
     "Additional Systemic Factors"
   )
@@ -366,9 +450,9 @@ kable(mfa_variance_table, caption = "MFA Variance Explanation for Indigenous Hea
   kable_styling(bootstrap_options = c("striped", "hover"), full_width = FALSE)
 ```
 
-MFA revealed clear structural patterning of health domains (Figure 1). Dimension 1 (structural access) explained `r round(variance_explained[1], 1)`% of variance, strongly loaded by healthcare access variables. Dimension 2 (health outcomes) explained `r round(variance_explained[2], 1)`% of variance, primarily representing mental health and diabetes patterning. The clear separation between Indigenous and non-Indigenous groups along these dimensions indicates systematic disparities in healthcare experiences that reflect broader structural inequities.
+MFA revealed clear structural patterning of health domains, with Dimension 1 (`r round(variance_explained[1], 1)`% variance) representing structural access barriers and Dimension 2 (`r round(variance_explained[2], 1)`% variance) capturing health outcome disparities. The geometric separation between Indigenous and non-Indigenous groups along these axes provides multivariate evidence that healthcare access disparities are systematically structured rather than random, reflecting broader colonial legacies in health system design.  
 
-## Structural Equation Modeling: Healthcare Access Pathways
+## Structural Equation Modeling: Health Care Access Pathways
 ```{r sem-indices}
 fit_indices_table <- data.frame(
   Index = c("CFI", "TLI", "RMSEA", "SRMR"),
@@ -385,9 +469,7 @@ kable(fit_indices_table, caption = "Structural Equation Model Fit Indices") %>%
   kable_styling(bootstrap_options = c("striped", "hover"), full_width = FALSE)
 ```
 
-The SEM demonstrated excellent model fit (Table 3), with all fit indices meeting established thresholds for good fit.
-
-```{r sem-diagram0, echo=FALSE, fig.cap="SEM Pathway Diagram with High-Contrast Theme", out.width="80%", fig.height=7}
+```{r sem-diagram0 , fig.cap="SEM Pathway Diagram with High-Contrast Theme", out.width="80%", fig.height=11}
 library(semPlot)
 high_contrast_palette <- c(
   "#1f77b4", "#ff7f0e",  # Blue-Orange
@@ -414,16 +496,16 @@ invisible(capture.output({
            rotation = 1,
            curvePivot = TRUE,
            curve = 1.5,
-           sizeMan = 7,
-           sizeLat = 9,
-           edge.label.cex = 0.9,
-           label.cex = 0.9,
+           sizeMan = 10,        # Increased from 7
+           sizeLat = 12,        # Increased from 9
+           edge.label.cex = 1.2, # Increased from 0.9 (REMOVED DUPLICATE)
+           label.cex = .9,     # Increased from 0.9
            nodeLabels = c("Indigenous\nStatus", 
                          "Diabetes", 
                          "Regular\nProvider",
                          "Unmet\nNeeds",
                          "Mental\nHealth",
-                         "Healthcare\nAccess"),
+                         "Health Care\nAccess"),
            color = list(
              lat = sem_colors$latent,
              man = c(
@@ -434,91 +516,161 @@ invisible(capture.output({
                sem_colors$mental_health    # poor_mental_health
              )
            ),
+           # FIX FOR FAINT LINES:
+           edge.lty = ifelse(sem_fit@Model@GLIST$beta < 0.1, "dashed", "solid"),
+           edge.alpha = ifelse(abs(sem_fit@Model@GLIST$beta) < 0.1, 0.9, 1),
+           edge.width = ifelse(abs(sem_fit@Model@GLIST$beta) < 0.1, 2.5*gold_rat, 2.5),
+           asize = ifelse(abs(sem_fit@Model@GLIST$beta) < 0.1, 2.5*gold_rat, 2.5),              # Arrow size
+            esize = ifelse(abs(sem_fit@Model@GLIST$beta) < 0.1, 2.5*gold_rat, 2.5),             # Edge label size
+           # CRITICAL FIXES FOR READABILITY:
+           shapeMan = "rectangle",
+           shapeLat = "ellipse",
+           border.width = 1.5,
+           border.color = "black",
+           label.color = "white",  # White text on colored backgrounds
            edge.color = "black",
-           mar = c(6,4,6,4),  # Adjusted margins for legend space
+           mar = c(12, 5, 6, 5),  # Large bottom margin for legend
            nCharNodes = 0,
            intercepts = FALSE,
            residuals = FALSE,
            thresholds = FALSE,
-           optimizeLatRes = TRUE)
+           optimizeLatRes = TRUE,
+           # Node styling for better contrast:
+           node.width = 2,
+           node.height = 1,
+           aspect = 2,
+           # Font styling:
+           font = 2,  # Bold font
+           label.scale = TRUE,
+           label.prop = 0.9,
+           # Background and overall theme:
+           bg = "white",
+           # Edge styling:
+           edge.label.color = "black",
+           edge.label.bg = "white")
 }))
 
-# Add title
-title("SEM: Healthcare Access Pathways\nStandardized Coefficients", 
-      line = 1, cex.main = 0.9, col = high_contrast_palette[1])
+# Add title with better styling
+title("SEM: Health Care Access Pathways\nStandardized Coefficients", 
+      line = 2, cex.main = 1.3, col = high_contrast_palette[1], font.main = 4)
 
-# Add legend in a visible position (bottom with small positive inset)
+# Add legend with better visibility
 legend("bottom", 
        legend = c("Latent Construct", "Indigenous Status", "Diabetes", 
                  "Mental Health", "Access Indicators"),
        fill = c(sem_colors$latent, sem_colors$indigenous, sem_colors$diabetes,
                sem_colors$mental_health, sem_colors$access_indicators),
-       cex = 0.6, bty = "n", text.col = high_contrast_palette[3],
-       horiz = FALSE, ncol = 2, xpd = TRUE, inset = c(0, 0.02))
+       cex = 0.8, bty = "n", text.col = high_contrast_palette[1],
+       horiz = FALSE, ncol = 2, xpd = TRUE, inset = c(0, -0.0001))
 ```
 
-```{r sem-diagram, echo=FALSE, fig.cap="Structural Equation Model of Indigenous Health Disparities: Direct and Mediated Pathways", out.width="80%",include=F}
+```{r sem-diagram , fig.cap="Structural Equation Model of Indigenous Health Disparities: Direct and Mediated Pathways", out.width="80%",include=F}
 # Ensure figures directory exists
 if(!dir.exists("figures")) dir.create("figures")
 
-# Save high-quality version
-png("figures/sem_pathways.png", width = 10, height = 8, units = "in", res = 300)
-semPaths(sem_fit,
-         what = "std", 
-         whatLabels = "std",
-         style = "lisrel", 
-         layout = "tree2",
-         rotation = 1, 
-         curvePivot = TRUE, 
-         curve = 1.5,
-         sizeMan = 7,        
-         sizeLat = 9,
-         edge.label.cex = 0.9, 
-         label.cex = 0.9,
-         nodeLabels = c("Indigenous\nStatus", "Diabetes", "Regular\nProvider",
-                       "Unmet\nNeeds", "Mental\nHealth", "Healthcare\nAccess"),
-         color = list(
-           lat = sem_colors$latent,
-           man = c(sem_colors$indigenous, sem_colors$diabetes,
-                  sem_colors$access_indicators, sem_colors$access_indicators,
-                  sem_colors$mental_health)
-         ),
-         edge.color = "black", 
-         mar = c(6,4,6,4),  # Same margins as above
-         nCharNodes = 0, 
-         intercepts = FALSE, 
-         residuals = FALSE,
-         thresholds = FALSE,
-         optimizeLatRes = TRUE)
-title("SEM: Healthcare Access Pathways\nStandardized Coefficients", 
-      line = 1, cex.main = 0.9, col = high_contrast_palette[1])
+# Use a better aspect ratio for the PNG
+png("figures/sem_pathways.png", width = 10, height = 10, units = "in", res = 300)
+
+library(semPlot)
+high_contrast_palette <- c(
+  "#1f77b4", "#ff7f0e",  # Blue-Orange
+  "#2ca02c", "#d62728",  # Green-Red
+  "#9467bd", "#8c564b",  # Purple-Brown
+  "#e377c2", "#7f7f7f"   # Pink-Gray
+)
+
+sem_colors <- list(
+  latent = high_contrast_palette[1],        # Blue for latent variables
+  indigenous = high_contrast_palette[2],    # Orange for Indigenous status
+  diabetes = high_contrast_palette[4],      # Red for diabetes
+  mental_health = high_contrast_palette[3], # Green for mental health
+  access_indicators = high_contrast_palette[5] # Purple for access indicators
+)
+
+# Use capture.output to completely suppress any output
+invisible(capture.output({
+  semPaths(sem_fit,
+           what = "std", 
+           whatLabels = "std",
+           style = "lisrel", 
+           layout = "tree2",
+           rotation = 1, 
+           curvePivot = TRUE, 
+           curve = 1.5,
+           sizeMan = 9,        # Slightly smaller for PNG
+           sizeLat = 11,       # Slightly smaller for PNG
+           edge.label.cex = 1.2, 
+           label.cex = .9,
+           nodeLabels = c("Indigenous\nStatus", "Diabetes", "Regular\nProvider",
+                       "Unmet\nNeeds", "Mental\nHealth", "Health Care\nAccess"),
+           color = list(
+             lat = sem_colors$latent,
+             man = c(sem_colors$indigenous, sem_colors$diabetes,
+                    sem_colors$access_indicators, sem_colors$access_indicators,
+                    sem_colors$mental_health)
+           ),
+           # FIX FOR FAINT LINES:
+           edge.lty = ifelse(sem_fit@Model@GLIST$beta < 0.1, "dashed", "solid"),
+           edge.alpha = ifelse(abs(sem_fit@Model@GLIST$beta) < 0.1, 0.9, 1),
+           edge.width = ifelse(abs(sem_fit@Model@GLIST$beta) < 0.1, 2.5*gold_rat, 2.5),
+           asize = ifelse(abs(sem_fit@Model@GLIST$beta) < 0.1, 2.5*gold_rat, 2.5),          # Arrow size
+            esize = ifelse(abs(sem_fit@Model@GLIST$beta) < 0.1, 2.5*gold_rat, 2.5), 
+           # Other styling:
+           shapeMan = "rectangle",
+           shapeLat = "ellipse",
+           border.width = 1.5,
+           border.color = "black",
+           label.color = "white",
+           mar = c(12, 4, 6, 4),  # Large bottom margin for legend
+           nCharNodes = 0, 
+           intercepts = FALSE, 
+           residuals = F,
+           thresholds = FALSE,
+           optimizeLatRes = TRUE,
+           node.width = 2,
+           node.height = 1,
+           aspect = 2,
+           font = 2,
+           label.scale = TRUE,
+           label.prop = 0.9,
+           bg = "white",
+           edge.label.color = "black",
+           edge.label.bg = "white")
+}))
+
+# FIX FOR TITLE POSITION - use negative line to bring it down
+title("SEM: Health Care Access Pathways\nStandardized Coefficients", 
+      line = 1, cex.main = 1.2, col = high_contrast_palette[1], font.main = 4)
+
 legend("bottom", 
        legend = c("Latent Construct", "Indigenous Status", "Diabetes", 
                  "Mental Health", "Access Indicators"),
        fill = c(sem_colors$latent, sem_colors$indigenous, sem_colors$diabetes,
                sem_colors$mental_health, sem_colors$access_indicators),
-       cex = 0.6, bty = "n", text.col = high_contrast_palette[3],
-       horiz = FALSE, ncol = 2, xpd = TRUE, inset = c(0, 0.02))
+       cex = 0.7, bty = "n", text.col = high_contrast_palette[1],
+       horiz = FALSE, ncol = 2, xpd = TRUE, inset = c(0, -0.0001))
 dev.off()
 ```
 
-```{r sem-results, echo=FALSE}
+```{r sem-results }
 kable(significant_paths, caption = "Standardized Parameter Estimates for Significant SEM Pathways", digits = 3) %>%
   kable_styling(bootstrap_options = c("striped", "hover"), full_width = FALSE)
 ```
 
-The SEM results (Table 4) reveal distinct healthcare disparity pathways, with strong measurement model validity ($\beta$ = 0.665 for unmet needs) and significant direct effects of Indigenous status on diabetes ($\beta$ = 0.033, p < .001). Figure 2 visualizes these structural relationships, highlighting:
+The excellent model fit (CFI=`r sem_fit_measures["cfi"]`; Table 3) validates the theoretical framework positioning healthcare access as a mediating construct. In Table 4, the strong measurement loading for unmet needs ($\beta$ = `r round(sem_results[sem_results$lhs=="healthcare_access" & sem_results$rhs=="has_unmet_needs", "std.all"], 3)`) confirms it as the primary indicator of structural barriers, while the divergent pathways reveal fundamentally different intervention requirements: historical trauma approaches for diabetes versus systemic access reforms for mental health.  
 
-1. **Healthcare Access Measurement**: Unmet needs strongly defines the latent construct ($\beta$ = 0.665), validating it as the primary indicator of structural barriers
-2. **Diabetes Pathway**: Direct Indigenous effect ($\beta$ = 0.033) operating outside healthcare access mediation
-3. **Mental Health Mediation**: Primarily through healthcare access ($\beta$ = -0.041) with minimal direct Indigenous effects ($\beta$ = 0.016)
+Figure 2 visualizes these structural relationships, highlighting:  
+
+1. **Health Care Access Measurement**: Unmet needs strongly defines the latent construct ($\beta$ = `r round(sem_results[sem_results$lhs=="healthcare_access" & sem_results$rhs=="has_unmet_needs", "std.all"], 3)`), validating it as the primary indicator of structural barriers
+2. **Diabetes Pathway**: Direct Indigenous effect ($\beta$ = `r round(sem_results[sem_results$lhs=="has_diabetes" & sem_results$rhs=="indigenous_binary", "std.all"], 3)`) operating outside health care access mediation
+3. **Mental Health Mediation**: Primarily through health care access ($\beta$ = `r round(sem_results[sem_results$lhs=="poor_mental_health" & sem_results$rhs=="healthcare_access", "std.all"], 3)`) with minimal direct Indigenous effects ($\beta$ = `r round(sem_results[sem_results$lhs=="poor_mental_health" & sem_results$rhs=="indigenous_binary", "std.all"], 3)`)
 
 The patterns demonstrate divergent causal mechanisms—diabetes reflecting historical trauma pathways while mental health disparities operate through contemporary access barriers.
 
 \newpage
 
 ## Machine Learning: Prioritizing Disparity Drivers
-```{r ml-imp-plot, fig.cap="Feature Importance for Indigenous Status Prediction"}
+```{r ml-imp-plot, fig.cap="Feature Importance for Indigenous Status Prediction", out.width="90%"}
 # Create simplified visualization focusing on Random Forest
 p_importance <- importance_df %>%
   mutate(Variable = factor(Variable, levels = Variable[order(MeanDecreaseGini)])) %>%
@@ -531,29 +683,28 @@ p_importance <- importance_df %>%
     x = "Mean Decrease in Gini Index (Higher = More Important)",
     y = "Predictor Variables"
   ) +
+  create_high_contrast_theme() +
   theme(legend.position = "none")
+  
 
 print(p_importance)
 
-ggsave("figures/feature_importance.png", p_importance, width=8, height=5, dpi=300)
+ggsave("figures/feature_importance.png", p_importance, width=10, height=10*gold_rat, dpi=300)
 ```
 
-```{r ml-interpretation, echo=FALSE}
-# Calculate accuracy
-rf_accuracy <- round(mean(predict(rf_model, test_data) == test_data$indigenous_binary), 3)
-
-# Create simplified interpretation table
+```{r ml-interpretation }
+# Create interpretation table that matches actual results
 feature_interpretation_table <- data.frame(
   Variable = importance_df$Variable,
-  `RF_Importance` = importance_df$MeanDecreaseGini%>%round(3),
-  `Interpretation` = c(
-    "Primary disparity driver: Unmet healthcare needs",
-    "Composite access barrier: Healthcare access limitations", 
+  RF_Importance = round(importance_df$MeanDecreaseGini, 3),
+  Interpretation = c(
+    "Mental health outcome: Psychological distress disparities",
+    "Composite access barrier: Health care access limitations", 
     "Structural barrier: Lack of regular provider",
-    "Health outcome: Diabetes prevalence gap",
-    "Mental health outcome: Psychological distress disparities"
+    "Primary disparity driver: Unmet Health Care needs",
+    "Health outcome: Diabetes prevalence gap"
   ),
-  `Policy_Priority` = c("Highest", "High", "High", "Medium", "Low")
+  Policy_Priority = c("Highest", "High", "High", "Medium", "Low")
 )
 
 kable(feature_interpretation_table, caption = "Random Forest Feature Importance Interpretation for Indigenous Status Prediction") %>%
@@ -561,133 +712,124 @@ kable(feature_interpretation_table, caption = "Random Forest Feature Importance 
   column_spec(c(2,3), width = c("1.5cm","8cm"))
 ```
 
-Machine learning analysis identified unmet healthcare needs as the strongest predictor of Indigenous status (Figure 3), with a Gini importance of `r round(importance_df$MeanDecreaseGini[1], 1)`—nearly double the importance of the second-ranked predictor. The Random Forest model achieved 85.4% accuracy in distinguishing Indigenous from non-Indigenous respondents based solely on health and access variables. The clear hierarchy of predictors (`r paste(importance_df$Variable, sep=" > ")`) provides empirical prioritization for policy interventions.
+The hierarchy of predictors reveals that mental health disparities are the most distinguishing feature, followed by composite health care access barriers, with diabetes showing the lowest predictive importance for Indigenous status identification. The `r rf_accuracy`% Random Forest classification accuracy demonstrates that health disparities are so pronounced they can reliably distinguish group membership based solely on health and access variables. Such a predictive performance underscores the systematic nature of these inequities, with mental health emerging as the most salient differentiator (Gini=`r round(importance_df$MeanDecreaseGini[1], 1)`), suggesting psychological distress disparities are the most distinctive feature of Indigenous health experiences in this dataset.
 
 \newpage
 
-## Health Disparity Gaps: Indigenous vs Non-Indigenous Comparison
-```{r disparity-gaps, fig.cap="Percentage point gaps in health indicators between Indigenous and non-Indigenous populations"}
-# Create disparity summary
-disparity_summary <- analysis_data %>%
-  group_by(indigenous_group) %>%
-  summarise(
-    Diabetes = mean(has_diabetes, na.rm = TRUE) * 100,
-    `No Regular Provider` = mean(has_regular_provider == 0, na.rm = TRUE) * 100,
-    `Unmet Healthcare Needs` = mean(has_unmet_needs, na.rm = TRUE) * 100,
-    `Poor Mental Health` = mean(poor_mental_health, na.rm = TRUE) * 100,
-    Sample_Size = n(),
-    .groups = 'drop'
-  ) %>%
-  filter(!is.na(indigenous_group))
+## Bayesian Multivariate Analysis of Health Disparities
 
-# Calculate gaps relative to non-Indigenous population
-gap_analysis <- disparity_summary %>%
-  filter(indigenous_group != "Non-Indigenous") %>%
-  left_join(
-    disparity_summary %>% 
-      filter(indigenous_group == "Non-Indigenous") %>%
-      select(-indigenous_group, -Sample_Size),
-    by = character(),
-    suffix = c("_indigenous", "_non_indigenous")
-  ) %>%
-  mutate(
-    Diabetes_Gap = Diabetes_indigenous - Diabetes_non_indigenous,
-    Provider_Gap = `No Regular Provider_indigenous` - `No Regular Provider_non_indigenous`,
-    Unmet_Gap = `Unmet Healthcare Needs_indigenous` - `Unmet Healthcare Needs_non_indigenous`,
-    Mental_Gap = `Poor Mental Health_indigenous` - `Poor Mental Health_non_indigenous`
-  )
-
-# Create the disparity gaps plot
-col_temp=get_contrast_palette(5)
-p_gaps_compact <- gap_analysis %>%
-  select(indigenous_group, ends_with("_Gap")) %>%
-  pivot_longer(cols = -indigenous_group, names_to = "Gap_Type", values_to = "Gap_Size") %>%
-  mutate(Gap_Type = str_remove(Gap_Type, "_Gap")) %>%
-  ggplot(aes(x = Gap_Size, y = reorder(indigenous_group, Gap_Size), fill = Gap_Type)) +
-  geom_col(position = "dodge", width = 0.7) +
-  geom_vline(xintercept = 0, linetype = "dashed", color = col_temp[5], alpha = 0.7) +
-  scale_fill_manual(name = "Health Indicator", values = col_temp[1:4])+
-  labs(
-    title = "Health Disparity Gaps: Indigenous vs Non-Indigenous",
-    x = "Percentage Point Gap (Indigenous - Non-Indigenous)",
-    y = "Indigenous Group"
-  ) +
-  theme(legend.position = "bottom")
-
-print(p_gaps_compact)
-
-# Save this version
-ggsave("figures/disparity_gaps.png", p_gaps_compact, 
-       width = 10, height = 7, dpi = 300, bg = "white")
-```
-
-```{r gap}
-gap_table <- gap_analysis %>%
-  select(indigenous_group, ends_with("_Gap")) %>%
-  rename(
-    Group = indigenous_group,
-    `Diabetes Gap` = Diabetes_Gap,
-    `No Provider Gap` = Provider_Gap,
-    `Unmet Needs Gap` = Unmet_Gap,
-    `Mental Health Gap` = Mental_Gap
-  ) %>%
-  mutate(across(where(is.numeric), ~round(., 1)))
-
-kable(gap_table, caption = "Percentage Point Gaps in Health Indicators (Indigenous - Non-Indigenous)") %>%
+```{r bayesian-res, fig.cap="Multivariate Bayesian Analysis: Health Pattern Odds Ratios (Reference: Neither condition)", out.width="90%"}
+kable(multivar_summary, caption = "Multivariate Bayesian Analysis: Health Pattern Prevalence by Indigenous Status") %>%
   kable_styling(bootstrap_options = c("striped", "hover"), full_width = FALSE)
+
+# Create visualization of multivariate results
+multivar_plot_data <- multivar_summary %>%
+  mutate(Health_Pattern = factor(Health_Pattern, 
+                                levels = c("Both Diabetes & Mental Health", "Mental Health Only", "Diabetes Only"))) %>%
+  separate(CI_95, into = c("CI_Lower", "CI_Upper"), sep = "-", remove = FALSE) %>%
+  mutate(CI_Lower = as.numeric(gsub("\\(", "", CI_Lower)),
+         CI_Upper = as.numeric(gsub("\\)", "", CI_Upper)))
+
+multivar_plot <- ggplot(multivar_plot_data, aes(x = Posterior_OR, y = Health_Pattern)) +
+  geom_vline(xintercept = 1, linetype = "dashed", color = "#7f7f7f", alpha = 0.7) +
+  geom_point(size = 3, color = get_contrast_palette(1)) +
+  geom_errorbarh(aes(xmin = CI_Lower, xmax = CI_Upper), height = 0.2, color = get_contrast_palette(1)) +
+  scale_x_continuous(trans = "log10", breaks = c(1, 2, 3, 4, 5)) +
+  labs(
+    title = "Multivariate Bayesian Analysis: Health Pattern Odds Ratios",
+    subtitle = "Indigenous vs Non-Indigenous comparison (Reference: Neither condition)",
+    x = "Odds Ratio (log scale)\n>1 = Higher odds in Indigenous group",
+    y = "Health Pattern"
+  ) +
+  create_high_contrast_theme()
+
+print(multivar_plot)
+ggsave("figures/multivariate_bayesian.png", multivar_plot, width=10, height=10*gold_rat, dpi=300)
 ```
-The disparity gaps visualization (Figure 4) shows percentage point differences between Indigenous groups and the non-Indigenous reference population. The red dashed line at zero represents the non-Indigenous baseline. Bars extending to the right indicate higher prevalence among Indigenous groups, while bars extending to the left would indicate lower prevalence. First Nations populations experience the largest gaps in unmet healthcare needs (`r round(gap_analysis$Unmet_Gap[1], 1)` percentage points higher) and diabetes prevalence (`r round(gap_analysis$Diabetes_Gap[1], 1)` percentage points higher), while Métis populations show substantial gaps in unmet healthcare needs (`r round(gap_analysis$Unmet_Gap[2], 1)` percentage points) and mental health indicators.
+
+
+The Bayesian multivariate approach (Table 6, Figure 4) reveals complex health burden patterns that univariate analyses miss. While Indigenous respondents show lower diabetes prevalence in isolation, they face dramatically higher odds of mental health conditions (`r multivar_summary[2,4]`×) and co-occurring conditions (`r multivar_summary[3,4]`×). The observed pattern underscores the importance of examining multiple health conditions simultaneously to understand the full burden of health disparities. Indigenous respondents face substantially higher odds across all health patterns relative to the reference category (neither condition). Most notably, the odds of mental-health-only conditions are `r multivar_summary[2,4]`× higher `r gsub("\\(","\\(95% CrI: ",multivar_summary[2,5])`, highlighting mental health as the predominant disparity requiring urgent policy attention.
 
 \newpage
 
 # Discussion
-The study demonstrates the value of an integrated mixed-methods approach for understanding the complex architecture of Indigenous health disparities in Canada through a cultural safety lens (Hogg et al., 2024). The findings reveal fundamental insights with significant methodological and policy implications, contextualized within the four directions of healing—mental, physical, emotional, and spiritual—that frame Indigenous conceptions of health.
 
-## Key Findings and Policy Implications
-The study demonstrates the value of an integrated mixed-methods approach for understanding the complex architecture of Indigenous health disparities in Canada through a cultural safety lens (Hogg et al., 2024). The findings reveal fundamental insights with significant methodological and policy implications, contextualized within the four directions of healing—mental, physical, emotional, and spiritual—that frame Indigenous conceptions of health.
+## Technical Findings: Integrated Evidence of Structural Health Disparities
 
-### Divergent Health Outcome Pathways Require Distinct Policy Responses
-The SEM results reveal fundamentally different causal pathways for diabetes versus mental health disparities, with critical implications for policy targeting:
+### Multiple Factor Analysis Reveals Structural Patterning
+The MFA demonstrated clear separation between Indigenous and non-Indigenous groups along health care access dimensions, with `r round(mfa_result$eig[1,2], 1)`% of variance explained by structural access factors. The geometric separation in multivariate space provides visual evidence of systematic disparities in health care experiences.
 
-### Diabetes: Historical Trauma Embodiment
-The significant direct effect of Indigenous status on diabetes ($\beta$ = `r round(sem_results[sem_results$lhs=="has_diabetes" & sem_results$rhs=="indigenous_binary", "std.all"], 3)`, p < .001), largely unmediated by contemporary healthcare access, underscores how diabetes disparities represent the embodiment of historical trauma and intergenerational disruption. The pathway operates through colonial disruptions to traditional food systems, forced dietary changes, and transgenerational metabolic impacts that cannot be fully addressed through healthcare access alone. For territorial political organizations, the necessitates trauma-informed approaches addressing intergenerational impacts beyond healthcare system reforms.
+### Structural Equation Modeling Confirms Divergent Causal Pathways
+The SEM results reveal fundamentally different mechanistic pathways with excellent model fit (CFI = `r round(fitMeasures(sem_fit)["cfi"], 3)`). Diabetes disparities operate through direct historical trauma effects ($\beta$ = `r round(sem_results[sem_results$lhs=="has_diabetes" & sem_results$rhs=="indigenous_binary", "std.all"], 3)`), while mental health disparities function primarily through health care access mediation ($\beta$ = `r round(sem_results[sem_results$lhs=="poor_mental_health" & sem_results$rhs=="healthcare_access", "std.all"], 3)`).
 
-### Mental Health: Structural Mediation Dominance
-In stark contrast, mental health disparities operate primarily through healthcare access mediation ($\beta$ = `r round(sem_results[sem_results$lhs=="poor_mental_health" & sem_results$rhs=="healthcare_access", "std.all"], 3)`, p < .001), with minimal direct Indigenous effects ($\beta$ = `r round(sem_results[sem_results$lhs=="poor_mental_health" & sem_results$rhs=="indigenous_binary", "std.all"], 3)`). It indicates that `r round((abs(sem_results[sem_results$lhs=="poor_mental_health" & sem_results$rhs=="healthcare_access", "std.all"]) / (abs(sem_results[sem_results$lhs=="poor_mental_health" & sem_results$rhs=="healthcare_access", "std.all"]) + abs(sem_results[sem_results$lhs=="poor_mental_health" & sem_results$rhs=="indigenous_binary", "std.all"])) * 100), 0)`% of the Indigenous mental health disparity is explained by healthcare access barriers, making mental health outcomes particularly responsive to structural healthcare reforms. It validates advocacy focusing on healthcare system barriers for mental health outcomes.
+### Machine Learning Identifies Mental Health as Primary Predictor
+The Random Forest analysis reinforces these findings, with poor mental health emerging as the strongest predictor of Indigenous status (Gini importance = `r round(importance_df$MeanDecreaseGini[1], 1)`). The model achieved `r rf_accuracy`% classification accuracy, demonstrating health disparities are sufficiently pronounced to reliably distinguish group membership.
 
-### Healthcare Access Construct Validation
-The strong factor loading of unmet needs on the healthcare access latent variable ($\beta$ = `r round(sem_results[sem_results$lhs=="healthcare_access" & sem_results$rhs=="has_unmet_needs", "std.all"], 3)`, p < .001) confirms that unmet healthcare needs serve as the primary indicator of structural access barriers. The empirical validation explains why machine learning identified unmet needs as the strongest predictor of Indigenous status (Gini importance = `r round(importance_df$MeanDecreaseGini[1], 1)`), providing robust evidence for prioritizing unmet needs in policy interventions.
+### Bayesian Multivariate Analysis Reveals Dominant Mental Health Burden
+The Bayesian multivariate categorical model provides robust evidence of health condition clustering. Indigenous respondents show `r round(exp(multivar_results$hypothesis$Estimate[2]), 2)`× higher odds of mental-health-only conditions `r gsub("\\(","\\(95% CrI: ",multivar_summary[2,5])`, establishing this as the most substantial disparity. The `r round(exp(multivar_results$hypothesis$Estimate[3]), 2)`× higher odds of co-occurring conditions `r gsub("\\(","\\(95% CrI: ",multivar_summary[3,5])` further demonstrates complex health burden patterns.
 
-The MFA revealed that healthcare access dimensions explain the majority of systematic variance in Indigenous health disparities. For Northern Manitoba communities represented by organizations like MKO, the structural patterning underscores that health inequities are not individual failures but systematic structural inequities requiring policy-level interventions. The clear separation between Indigenous and non-Indigenous groups along healthcare access dimensions reflects the geographic and systemic barriers that disproportionately affect Northern communities.
+## Policy Translation: From Statistical Evidence to Actionable Interventions
 
-The diabetes disparities must be understood within the context of historical and inter-generational food insecurity, where colonial policies disrupted traditional food systems and created dependency on nutritionally inadequate food sources (UWO Commentary, 2024). For policy analysis in territorial political advocacy contexts, it means framing diabetes not as a biomedical condition but as a manifestation of historical trauma, where the intergenerational disruption of traditional foodways and forced dependency on government programs created the conditions for metabolic disease disparities.
+### Mental Health Sovereignty as Urgent Priority
+The consistent evidence across all analytical approaches points to mental health as the predominant health disparity facing Indigenous populations. For territorial organizations like MKO, this underscores the imperative for mental health sovereignty—Indigenous-led, culturally grounded mental health services that address historical trauma while providing contemporary support. The `r round(exp(multivar_results$hypothesis$Estimate[2]), 2)`× higher odds of mental-health-only conditions represents not just a statistical finding but a crisis requiring immediate policy response.
 
-Machine learning established a clear, empirically-driven hierarchy of disparity drivers, with unmet healthcare needs emerging as the dominant predictor of Indigenous status (Gini importance = `r round(importance_df$MeanDecreaseGini[1], 1)`). This finding, with 85.4% classification accuracy, provides robust evidence that addressing unmet healthcare needs should be the primary focus for territorial organizations. The fact that healthcare access variables collectively outperformed health outcomes in predicting Indigenous status indicates that access barriers precede and potentially drive health outcome disparities.
+### Complex Health Patterns Require Nuanced Interpretation
+The lower diabetes prevalence in univariate analyses (Table 1 shows `r sample_table[sample_table$indigenous_group=="Indigenous", "% Diabetes"]`% vs `r sample_table[sample_table$indigenous_group=="Non-Indigenous", "% Diabetes"]`%) coupled with higher diabetes-related odds in multivariate models (`r multivar_summary[1,4]`× for diabetes-only, `r multivar_summary[3,4]`× for co-occurring conditions) illustrates the importance of multivariate approaches. This pattern suggests that while diabetes prevalence may be lower overall among Indigenous respondents, those who do experience diabetes face substantially higher burdens of co-occurring mental health conditions, representing a different but equally important health equity challenge.
+
+## Geographic and Methodological Contextualization
+
+### Northern Manitoba Specificity and Data Limitations
+These national patterns likely underestimate disparities in Northern Manitoba communities where geographic isolation, environmental impacts, and historical underinvestment create cumulative disadvantages. The CCHS exclusion of on-reserve populations (Statistics Canada, 2017) means these findings represent a conservative estimate of the true disparities facing MKO-represented communities. This methodological limitation underscores the need for community-specific data collection that captures the unique challenges of Northern and remote Indigenous communities.
+
+### Data Sovereignty and Future Research
+The methodological sophistication demonstrated here—particularly the Bayesian multivariate approach—provides a template for future Indigenous health research that respects data sovereignty while employing cutting-edge statistical methods. Future work should prioritize community-based participatory research designs, longitudinal data collection, and measures that better capture cultural connectedness and historical trauma impacts.
+
+## Integrated Policy Framework
+
+### Pathway-Specific Intervention Strategy
+
+1. **Mental Health**: Prioritize structural health care access reforms and Indigenous-led mental health services
+2. **Diabetes**: Implement historical trauma-informed prevention that addresses intergenerational impacts
+3. **Co-occurring Conditions**: Develop integrated care models that address both physical and mental health simultaneously
+
+### Strength-Based Community Approaches
+The complex health patterns revealed suggest resilience and adaptive strategies within Indigenous communities that merit further investigation and support. Policy should build upon community strengths while addressing systemic barriers through culturally safe, self-determined health initiatives.
+
+This integrated analysis demonstrates that advanced statistical methods, when properly contextualized, can provide both methodological innovation and practical guidance for addressing Canada's persistent Indigenous health disparities.
 
 ## Strategic Policy Framing for Territorial Advocacy
+
 When analyzing health policies for territorial political organizations, the data support framing health inequities as:
 
-1. **Pathway-Specific Interventions**: Diabetes requires historical trauma-informed approaches, while mental health responds to healthcare access reforms. Policy must address these divergent causal pathways differently.
+1. **Pathway-Specific Interventions**: Diabetes requires historical trauma-informed approaches, while mental health responds to health care access reforms. Policy must address these divergent causal pathways differently.
 
 2. **Structural, Not Individual**: The MFA and SEM results demonstrate that disparities operate through systemic pathways, not individual behaviors. Policy analysis should focus on structural determinants rather than individual risk factors.
 
 3. **Historical Trauma Embodiment**: Diabetes disparities represent the embodiment of historical trauma through intergenerational pathways. Policy responses should address both contemporary access barriers and historical reparations.
 
-4. **Access Precedes Outcomes**: The machine learning hierarchy shows healthcare access barriers predict health status. Policy should prioritize upstream access interventions before downstream treatment.
+4. **Access Precedes Outcomes**: The machine learning hierarchy shows health care access barriers predict health status. Policy should prioritize upstream access interventions before downstream treatment.
 
 5. **Northern Context Specificity**: For Northern communities, geographic isolation compounds systemic barriers. Policy analysis must account for the unique challenges of service delivery in remote regions.
 
 ## Methodological Contribution
-The project represents significant methodological advancement through its integrated design where each technique informs the next in a coherent analytical pipeline. The SEM component moves beyond descriptive pattern recognition to test specific causal pathways, while machine learning provides actionable prioritization for policy interventions.
+
+This research makes three significant methodological contributions to Indigenous health disparities research. First, the integrated MFA→SEM→ML→Bayesian workflow represents a novel approach to health equity analysis that combines exploratory pattern discovery, confirmatory pathway testing, predictive prioritization, and multivariate complexity modeling. Second, the Bayesian multivariate categorical model introduces sophisticated handling of comorbid health conditions that accounts for their correlated nature while providing robust estimates despite substantial sample size imbalances—a common challenge in health disparities research. Third, the study demonstrates how advanced statistical methods can be ethically deployed within Indigenous health research when grounded in cultural safety frameworks and respect for data sovereignty principles (First Nations Information Governance Centre, 2014).  
+
+The methodological triangulation provides both academic rigor and practical policy relevance, bridging the often-separated domains of statistical sophistication and community-centered research. This approach offers a template for future health equity research that honors both methodological excellence and ethical engagement with Indigenous communities.  
 
 ## Limitations and Future Research
-This study has several limitations, including its cross-sectional design, which limits causal inference. Future research should incorporate longitudinal designs, community-based participatory research methods, and more nuanced measures of colonialism and cultural connectedness that better capture the four directions of healing.
+
+This study has several limitations that contextualize its findings. The cross-sectional design precludes causal inference, though the SEM and Bayesian approaches provide robust evidence of structural relationships. The CCHS exclusion of on-reserve Indigenous populations (Statistics Canada, 2017) means these findings likely underestimate true disparities in Northern and remote communities where geographic isolation compounds systemic barriers. Additionally, the binary Indigenous status measurement masks important heterogeneity within First Nations, Métis, and Inuit populations, each with distinct colonial histories and health contexts (Smylie & Firestone, 2016).  
+
+The reliance on self-reported data introduces potential measurement error, though this is mitigated by the CCHS's rigorous methodology. The Bayesian multivariate analysis, while robust for handling sample imbalances, cannot establish temporal precedence for causal claims. Future research should incorporate longitudinal designs, community-based participatory methods (Flicker et al., 2024), and more nuanced measures of cultural connectedness and historical trauma that better capture Indigenous conceptions of holistic health across physical, mental, emotional, and spiritual dimensions.  
 
 # Conclusion
 
-The triangulation of multivariate methods provides robust evidence that structural healthcare access barriers, particularly unmet needs, are the primary drivers of Indigenous health disparities in Canada, but with crucial pathway differentiation. The SEM revealed that mental health disparities operate primarily through healthcare access mediation (72% of disparity), making them directly addressable through systemic reforms, while diabetes disparities reflect stronger historical trauma pathways requiring trauma-informed approaches beyond healthcare access alone.
+The triangulation of multivariate methods provides robust evidence that structural healthcare access barriers, particularly unmet needs, are the primary drivers of Indigenous health disparities in Canada, operating through crucially differentiated pathways. The SEM revealed that mental health disparities operate primarily through healthcare access mediation (`r round((abs(sem_results[sem_results$lhs=="poor_mental_health" & sem_results$rhs=="healthcare_access", "std.all"]) / (abs(sem_results[sem_results$lhs=="poor_mental_health" & sem_results$rhs=="healthcare_access", "std.all"]) + abs(sem_results[sem_results$lhs=="poor_mental_health" & sem_results$rhs=="indigenous_binary", "std.all"])) * 100), 0)`% of total disparity), making them directly addressable through systemic reforms. In contrast, diabetes disparities reflect stronger historical trauma pathways requiring trauma-informed approaches beyond healthcare access alone (Reading & Wien, 2009).
 
-For policy analysts working with territorial political organizations, the analysis supports differentiated advocacy: healthcare system reforms for mental health equity and historical trauma interventions for diabetes prevention. By centering structural determinants within a cultural safety framework and employing advanced statistical methods, this research contributes to both methodological innovation and health equity advancement that honors the four directions of healing.
+The Bayesian multivariate analysis further highlights the overwhelming mental health burden, with Indigenous respondents facing `r multivar_summary[2,4]`× higher odds of mental health issues only and `r multivar_summary[3,4]`× higher odds of both diabetes and mental health conditions. These findings support what Indigenous scholars have long asserted: that mental health represents the most profound health equity challenge facing Indigenous communities, rooted in the ongoing impacts of colonial violence and cultural disruption (Kirmayer et al., 2014).
+
+For policy analysts working with territorial political organizations, the analysis supports differentiated advocacy: healthcare system reforms for mental health equity and historical trauma interventions for diabetes prevention. By centering structural determinants within a cultural safety framework and employing advanced statistical methods, this research contributes to both methodological innovation and health equity advancement that honors Indigenous self-determination and the four directions of healing.
 
 \newpage
 
@@ -697,6 +839,10 @@ For policy analysts working with territorial political organizations, the analys
 \setlength{\leftskip}{0.5in}
 \setlength{\parskip}{8pt}
 Breiman, L. (2001). Random forests. *Machine Learning*, 45(1), 5-32.   
+\setlength{\parindent}{-0.5in}
+\setlength{\leftskip}{0.5in}
+\setlength{\parskip}{8pt}
+First Nations Information Governance Centre. (2014). *Ownership, Control, Access and Possession (OCAP™): The path to First Nations information governance.* https://fnigc.ca/ocap-training/  
 
 \setlength{\parindent}{-0.5in}
 \setlength{\leftskip}{0.5in}
@@ -706,7 +852,7 @@ Flicker, S., et al. (2024). "Nothing about us without us": The promises and pitf
 \setlength{\parindent}{-0.5in}
 \setlength{\leftskip}{0.5in}
 \setlength{\parskip}{8pt}
-Hogg, R., et al. (2024). Cultural safety in healthcare systems: A systematic review of intervention characteristics and outcomes. *International Journal for Quality in Health Care*.  
+Hogg, R., et al. (2024). Cultural safety in healthcare systems: A systematic review of intervention characteristics and outcomes. *International Journal for Quality in healthcare*.  
 
 \setlength{\parindent}{-0.5in}
 \setlength{\leftskip}{0.5in}
@@ -716,12 +862,28 @@ Husson, F., Lé, S., & Pagès, J. (2010). *Exploratory multivariate analysis by 
 \setlength{\parindent}{-0.5in}
 \setlength{\leftskip}{0.5in}
 \setlength{\parskip}{8pt}
+Kirmayer, L. J., Gone, J. P., & Moses, J. (2014). Rethinking historical trauma. *Transcultural Psychiatry, 51*(3), 299–319.  
+
+\setlength{\parindent}{-0.5in}
+\setlength{\leftskip}{0.5in}
+\setlength{\parskip}{8pt}
 Kline, R. B. (2015). *Principles and practice of structural equation modeling*. Guilford publications.  
 
 \setlength{\parindent}{-0.5in}
 \setlength{\leftskip}{0.5in}
 \setlength{\parskip}{8pt}
+Reading, C. L., & Wien, F. (2009). *Health inequalities and social determinants of Aboriginal peoples' health.* National Collaborating Centre for Aboriginal Health.  
+
+\setlength{\parindent}{-0.5in}
+\setlength{\leftskip}{0.5in}
+\setlength{\parskip}{8pt}
 Smylie, J., & Firestone, M. (2016). The health of Indigenous peoples. In D. Raphael (Ed.), *Social determinants of health: Canadian perspectives*. Canadian Scholars' Press.  
+
+\setlength{\parindent}{-0.5in}
+\setlength{\leftskip}{0.5in}
+\setlength{\parskip}{8pt}
+Statistics Canada. (2017). *Canadian Community Health Survey (CCHS) - 2017-2018 Annual component: User guide*. 
+https://www23.statcan.gc.ca/imdb/p2SV.pl?Function=getSurvey&SDDS=3226  
 
 \setlength{\parindent}{-0.5in}
 \setlength{\leftskip}{0.5in}
@@ -767,8 +929,7 @@ University of Western Ontario Commentary. (2024). *Indigenous health inequity: U
 \setlength{\parskip}{8pt}
 Wolf, E. J., Harrington, K. M., Clark, S. L., & Miller, M. W. (2013). Sample size requirements for structural equation models: An evaluation of power, bias, and solution propriety. *Educational and Psychological Measurement*, 73(6), 913-934.  
 
-**Note:** Additional references from the provided literature have been integrated throughout the document.  
-
-**Note:** All analyses are based on Statistics Canada data and the responsibility for the use and interpretation of these data is entirely that of the author.
+\vspace{1em}
+\noindent\textbf{Note:} Additional references from the provided literature have been integrated throughout the document.
 
 
